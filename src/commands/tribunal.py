@@ -45,7 +45,7 @@ async def command_tribunal(message: Message) -> None:
     await database.setTribunalTimeout(message.chat.id, endTime + 90)  # Обновление таймаута для трибунала
     msg = await bot.send_poll(chat_id=message.chat.id,
                               reply_to_message_id=message.reply_to_message.message_id,
-                              question=f"Трибунал ({nameformat.nameformat(message.reply_to_message.from_user.id, message.reply_to_message.from_user.username, message.reply_to_message.from_user.first_name, message.reply_to_message.from_user.last_name, False)})",
+                              question=f"Трибунал ({nameformat.nameFormat(message.reply_to_message.from_user.id, message.reply_to_message.from_user.username, message.reply_to_message.from_user.first_name, message.reply_to_message.from_user.last_name, False)})",
                               options=["За", "Против"],
                               is_anonymous=False,
                               reply_markup=keyboards.cancel_tribunal_keyboard(endTime - int(time())))
@@ -60,7 +60,7 @@ async def command_tribunal(message: Message) -> None:
     poll = await bot.stop_poll(chat_id=message.chat.id, message_id=msg.message_id,
                                reply_markup=keyboards.ended_tribunal_keyboard())
 
-    name = nameformat.nameformat(message.reply_to_message.from_user.id,
+    name = nameformat.nameFormat(message.reply_to_message.from_user.id,
                                  message.reply_to_message.from_user.username,
                                  message.reply_to_message.from_user.first_name,
                                  message.reply_to_message.from_user.last_name)
@@ -71,11 +71,11 @@ async def command_tribunal(message: Message) -> None:
         return
 
     votes = {option.text: option.voter_count for option in poll.options}
-    mute_votes = int(votes['За'] * 100 / poll.total_voter_count)  # Подсчет процента "за"
+    muteVotes = int(votes['За'] * 100 / poll.total_voter_count)  # Подсчет процента "за"
 
-    if mute_votes < 66:
+    if muteVotes < 66:
         await message.answer(
-            f"Голосование за мут {name} закончилось с {mute_votes}% голосов за, но для мута требуется хотя бы 66%, пользователь не будет замучен.")
+            f"Голосование за мут {name} закончилось с {muteVotes}% голосов за, но для мута требуется хотя бы 66%, пользователь не будет замучен.")
         return
     tribunalizable = (await message.chat.get_member(user_id=message.reply_to_message.from_user.id)).status  # Обновляю инфу окончательно, а то пока был трибунал его могли замутить
     if tribunalizable in (ChatMemberStatus.RESTRICTED,):
@@ -87,6 +87,6 @@ async def command_tribunal(message: Message) -> None:
                                                until_date=(int(time()) + ((votes['За'] * 2 - votes['Против']) * 60)),
                                                permissions=ChatPermissions(can_send_messages=False))
         await message.answer(
-            f"Голосование за мут {name} закончилось с {mute_votes}% голосов за, пользователь отправляется в мут на {(votes['За'] * 2) - votes['Против']} минут.")
+            f"Голосование за мут {name} закончилось с {muteVotes}% голосов за, пользователь отправляется в мут на {(votes['За'] * 2) - votes['Против']} минут.")
     except Exception:
         pass

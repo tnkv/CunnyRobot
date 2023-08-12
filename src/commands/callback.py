@@ -16,15 +16,15 @@ bot = Bot(token=os.getenv('TOKEN'), parse_mode="HTML")
 @router.callback_query(CaptchaCallbackFactory.filter())  # Принимаю калбек команды
 async def callback_captcha(callback: CallbackQuery, callback_data: CaptchaCallbackFactory):
     date = callback_data.date
-    actual_date = int(time())
+    actualDate = int(time())
     user = callback_data.user
     chat = callback_data.chat
     if callback.from_user.id != user:
         await callback.answer(text="Эта кнопка не для тебя.", show_alert=True)
         return
 
-    if date + 60 >= actual_date:
-        await callback.answer(text=f"Кнопка заработает через {date + 60 - actual_date} секунд.", show_alert=True)
+    if date + 60 >= actualDate:
+        await callback.answer(text=f"Кнопка заработает через {date + 60 - actualDate} секунд.", show_alert=True)
         return
 
     await callback.answer()
@@ -51,14 +51,14 @@ async def callback_captcha(callback: CallbackQuery, callback_data: CaptchaCallba
 
 # Обработка отмены трибунала
 @router.callback_query(F.data == "cancel_tribunal")
-async def cancel_tribunal(callback: CallbackQuery):
+async def callback_cancel_tribunal(callback: CallbackQuery):
     initiator = (await callback.message.chat.get_member(user_id=callback.from_user.id)).status
     if initiator not in (ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR):
         await callback.answer()
         return
     await database.setTribunalTimeout(callback.message.chat.id, int(time()))
     try:
-        name = nameformat.nameformat(callback.from_user.id,
+        name = nameformat.nameFormat(callback.from_user.id,
                                      callback.from_user.username,
                                      callback.from_user.first_name,
                                      callback.from_user.last_name,
@@ -69,5 +69,5 @@ async def cancel_tribunal(callback: CallbackQuery):
 
 @router.callback_query(F.data == "ended_tribunal")
 @router.callback_query(F.data == "canceled_tribunal")
-async def callback_noanswer(callback: CallbackQuery):
+async def callback_no_answer(callback: CallbackQuery):
     await callback.answer()

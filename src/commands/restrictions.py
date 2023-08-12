@@ -8,7 +8,7 @@ from aiogram.types import Message, ChatPermissions
 router = Router()
 
 
-# бан
+# Бан
 @router.message(Command("ban"))
 async def command_ban(message: Message):
     initiator = (await message.chat.get_member(user_id=message.from_user.id)).status

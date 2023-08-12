@@ -25,7 +25,7 @@ async def command_give_admin(message: Message) -> None:
 
     await database.addImmune(message.chat.id, message.reply_to_message.from_user.id)
     await message.reply(
-        f"У пользователя {nameformat.nameformat(message.reply_to_message.from_user.id, message.reply_to_message.from_user.username, message.reply_to_message.from_user.first_name, message.reply_to_message.from_user.last_name)} появился иммунитет от трибунала, проверить наличие можно через /check, забрать иммунитет можно через /revoke_immune")
+        f"У пользователя {nameformat.nameFormat(message.reply_to_message.from_user.id, message.reply_to_message.from_user.username, message.reply_to_message.from_user.first_name, message.reply_to_message.from_user.last_name)} появился иммунитет от трибунала, проверить наличие можно через /check, забрать иммунитет можно через /revoke_immune")
 
 # Проверка наличия иммунитета
 @router.message(Command(commands=["check"]))
@@ -56,4 +56,4 @@ async def command_give_admin(message: Message) -> None:
 
     await database.revokeImmune(message.chat.id, message.reply_to_message.from_user.id)
     await message.reply(
-        f"У пользователя {nameformat.nameformat(message.reply_to_message.from_user.id, message.reply_to_message.from_user.username, message.reply_to_message.from_user.first_name, message.reply_to_message.from_user.last_name)} был отобран иммунитет от трибунала, проверить наличие можно через /check, выдать иммунитет можно через /give_immune")
+        f"У пользователя {nameformat.nameFormat(message.reply_to_message.from_user.id, message.reply_to_message.from_user.username, message.reply_to_message.from_user.first_name, message.reply_to_message.from_user.last_name)} был отобран иммунитет от трибунала, проверить наличие можно через /check, выдать иммунитет можно через /give_immune")

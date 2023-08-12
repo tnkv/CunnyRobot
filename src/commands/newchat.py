@@ -22,17 +22,17 @@ async def event_new_chat(event: ChatMemberUpdated):
 # Отправка капчи новому участнику если он не был замучен до этого
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=IS_NOT_MEMBER >> MEMBER))
 async def event_new_member(event: ChatMemberUpdated):
-    welcome_message = await database.getCaptchaText(event.chat.id)
+    welcomeMessage = await database.getCaptchaText(event.chat.id)
     try:
         await event.chat.restrict(user_id=event.from_user.id,
                                   until_date=0,
                                   permissions=ChatPermissions(can_send_messages=False))
-        name = nameformat.nameformat(event.from_user.id,
+        name = nameformat.nameFormat(event.from_user.id,
                                      event.from_user.username,
                                      event.from_user.first_name,
                                      event.from_user.last_name)
-        await bot.send_message(event.chat.id, (welcome_message.format(user=f"{name}")
-                                               if "{user}" in welcome_message else welcome_message),
+        await bot.send_message(event.chat.id, (welcomeMessage.format(user=f"{name}")
+                                               if "{user}" in welcomeMessage else welcomeMessage),
                                reply_markup=keyboards.captcha_keyboard(int(time()), event.from_user.id, event.chat.id))
     except Exception:
         return
@@ -40,7 +40,7 @@ async def event_new_member(event: ChatMemberUpdated):
 
 # Отправка сообщение участнику что нельзя размутиться если у него были до этого ограничены права
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=IS_NOT_MEMBER >> RESTRICTED))
-async def event_new_member(event: ChatMemberUpdated):
+async def event_new_member_restricted(event: ChatMemberUpdated):
     user = (await event.chat.get_member(user_id=event.from_user.id)).status
     print(user)
     if user not in (ChatMemberStatus.LEFT, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR, ChatMemberStatus.MEMBER):

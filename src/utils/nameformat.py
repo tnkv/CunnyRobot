@@ -1,7 +1,7 @@
 from aiogram.utils.markdown import html_decoration
 
 
-def nameformat(UserID: int, userName, firstName, surName,
+def nameFormat(UserID: int, userName, firstName, surName,
                isLink=True):  # Форматирование имени в зависимости от наличия юзернейма, фамилии итд
     if userName is not None:
         return f'<a href="tg://user?id={UserID}">@{userName}</a>' if isLink else f'@{userName}'
