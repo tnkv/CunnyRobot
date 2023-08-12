@@ -3,6 +3,7 @@ from time import time
 
 from aiogram import Bot
 from aiogram import Router
+from aiogram.enums import ChatMemberStatus
 from aiogram.filters import ChatMemberUpdatedFilter, IS_NOT_MEMBER, ADMINISTRATOR, MEMBER, RESTRICTED
 from aiogram.types import ChatMemberUpdated, ChatPermissions
 
@@ -40,5 +41,8 @@ async def event_new_member(event: ChatMemberUpdated):
 # Отправка сообщение участнику что нельзя размутиться если у него были до этого ограничены права
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=IS_NOT_MEMBER >> RESTRICTED))
 async def event_new_member(event: ChatMemberUpdated):
-    await bot.send_message(event.chat.id,
-                           "Привет, если тебя не замутил админ, то ты пропустил сообщение с кнопкой при первом входе, найди его с помощью \"<code>@</code>\" в поиске.")
+    user = (await event.chat.get_member(user_id=event.from_user.id)).status
+    print(user)
+    if user not in (ChatMemberStatus.LEFT, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR, ChatMemberStatus.MEMBER):
+        await bot.send_message(event.chat.id,
+                               "Привет, если тебя не замутил админ, то ты пропустил сообщение с кнопкой при первом входе, найди его с помощью \"<code>@</code>\" в поиске.")

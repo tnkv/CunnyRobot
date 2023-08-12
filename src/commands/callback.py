@@ -23,8 +23,8 @@ async def callback_captcha(callback: CallbackQuery, callback_data: CaptchaCallba
         await callback.answer(text="Эта кнопка не для тебя.", show_alert=True)
         return
 
-    if 60 >= actual_date:
-        await callback.answer(text=f"Кнопка заработает через {date + 60 - actual_date} секунд.")
+    if date + 60 >= actual_date:
+        await callback.answer(text=f"Кнопка заработает через {date + 60 - actual_date} секунд.", show_alert=True)
         return
 
     await callback.answer()
@@ -66,3 +66,8 @@ async def cancel_tribunal(callback: CallbackQuery):
         await bot.stop_poll(chat_id=callback.message.chat.id, message_id=callback.message.message_id, reply_markup=keyboards.canceled_tribunal_keyboard(name))
     except Exception:
         return
+
+@router.callback_query(F.data == "ended_tribunal")
+@router.callback_query(F.data == "canceled_tribunal")
+async def callback_noanswer(callback: CallbackQuery):
+    await callback.answer()

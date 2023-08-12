@@ -26,6 +26,7 @@ async def command_ban(message: Message):
 # Мут
 @router.message(Command(commands=["mute", "m"]))
 async def command_mute(message: Message):
+
     initiator = (await message.chat.get_member(user_id=message.from_user.id)).status
     if initiator not in (ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR):
         await message.reply("Ты не админ.")
@@ -80,6 +81,8 @@ async def command_mute(message: Message):
 # Перевод времени для темпмута
 def getRestrictTime(duration):
     unit = duration[-1]
+    if unit not in ("m", "h", "d"):
+        return 0
     value = int(duration[:-1])
     coefficient = {"m": 60, "h": 3600, "d": 86400}
-    return int(time()) + value * coefficient[unit] if unit in ("m", "h", "d") else 0
+    return int(time()) + value * coefficient[unit]
