@@ -23,6 +23,9 @@ async def event_new_chat(event: ChatMemberUpdated):
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=IS_NOT_MEMBER >> MEMBER))
 async def event_new_member(event: ChatMemberUpdated):
     welcomeMessage = await database.getCaptchaText(event.chat.id)
+    if welcomeMessage == "disable":
+        return
+
     try:
         await event.chat.restrict(user_id=event.from_user.id,
                                   until_date=0,
@@ -33,7 +36,8 @@ async def event_new_member(event: ChatMemberUpdated):
                                      event.from_user.last_name)
         await bot.send_message(event.chat.id, (welcomeMessage.format(user=f"{name}")
                                                if "{user}" in welcomeMessage else welcomeMessage),
-                               reply_markup=keyboards.captcha_keyboard(int(time()), event.from_user.id, event.chat.id))
+                               reply_markup=keyboards.captcha_keyboard(int(time()), event.from_user.id, event.chat.id),
+                               disable_web_page_preview=True)
     except Exception:
         return
 
@@ -41,8 +45,17 @@ async def event_new_member(event: ChatMemberUpdated):
 # Отправка сообщение участнику что нельзя размутиться если у него были до этого ограничены права
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=IS_NOT_MEMBER >> RESTRICTED))
 async def event_new_member_restricted(event: ChatMemberUpdated):
+    welcomeMessage = await database.getCaptchaText(event.chat.id)
+    if welcomeMessage == "disable":
+        return
+
+    name = nameformat.nameFormat(event.from_user.id,
+                                 event.from_user.username,
+                                 event.from_user.first_name,
+                                 event.from_user.last_name)
+
     user = (await event.chat.get_member(user_id=event.from_user.id)).status
-    print(user)
-    if user not in (ChatMemberStatus.LEFT, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR, ChatMemberStatus.MEMBER):
+    if user not in (
+            ChatMemberStatus.LEFT, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR, ChatMemberStatus.MEMBER):
         await bot.send_message(event.chat.id,
-                               "Привет, если тебя не замутил админ, то ты пропустил сообщение с кнопкой при первом входе, найди его с помощью \"<code>@</code>\" в поиске.")
+                               f"Привет {name}, если тебя не замутил админ, то ты пропустил сообщение с кнопкой при первом входе, найди его с помощью \"<code>@</code>\" в поиске.")

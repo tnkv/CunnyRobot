@@ -60,6 +60,16 @@ async def isImmune(TelegramChatID: int, TelegramUserID: int) -> bool:
     return False
 
 
+async def setCaptchaText(TelegramChatID: int, CaptchaText: str) -> None:
+    cur.execute('SELECT * FROM TribunalBot WHERE TelegramChatID = ?', (TelegramChatID,))
+    records = cur.fetchall()
+    if not records:
+        return
+    cur.execute('UPDATE TribunalBot SET CaptchaText = ? WHERE TelegramChatID = ?',
+                (CaptchaText, TelegramChatID))
+    conn.commit()
+
+
 async def getCaptchaText(TelegramChatID: int) -> str:
     cur.execute('SELECT * FROM TribunalBot WHERE TelegramChatID = ?', (TelegramChatID,))
     records = cur.fetchall()
