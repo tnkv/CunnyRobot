@@ -1,13 +1,9 @@
-import os
-
-from aiogram import Bot
 from aiogram import Router
 from aiogram.enums import ChatMemberStatus
 from aiogram.filters import Command
 from aiogram.types import Message
 
-from src.utils import database, nameformat
-
+from src.utils import database
 
 router = Router()
 

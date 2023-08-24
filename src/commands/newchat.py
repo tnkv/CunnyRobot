@@ -7,6 +7,7 @@ from aiogram.enums import ChatMemberStatus
 from aiogram.filters import ChatMemberUpdatedFilter, IS_NOT_MEMBER, ADMINISTRATOR, MEMBER, RESTRICTED
 from aiogram.types import ChatMemberUpdated, ChatPermissions
 
+from src.commands import restrictions
 from src.utils import keyboards, database, nameformat
 
 bot = Bot(token=os.getenv('TOKEN'), parse_mode="HTML")
@@ -22,6 +23,9 @@ async def event_new_chat(event: ChatMemberUpdated):
 # Отправка капчи новому участнику если он не был замучен до этого
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=IS_NOT_MEMBER >> MEMBER))
 async def event_new_member(event: ChatMemberUpdated):
+    if await restrictions.isCasBan(event.from_user.id):
+        await event.chat.ban(user_id=event.from_user.id)
+
     welcomeMessage = await database.getCaptchaText(event.chat.id)
     if welcomeMessage == "disable":
         return
@@ -45,7 +49,10 @@ async def event_new_member(event: ChatMemberUpdated):
 # Отправка сообщение участнику что нельзя размутиться если у него были до этого ограничены права
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=IS_NOT_MEMBER >> RESTRICTED))
 async def event_new_member_restricted(event: ChatMemberUpdated):
+    if await restrictions.isCasBan(event.from_user.id):
+        await event.chat.ban(user_id=event.from_user.id)
     welcomeMessage = await database.getCaptchaText(event.chat.id)
+
     if welcomeMessage == "disable":
         return
 
@@ -55,7 +62,12 @@ async def event_new_member_restricted(event: ChatMemberUpdated):
                                  event.from_user.last_name)
 
     user = (await event.chat.get_member(user_id=event.from_user.id)).status
-    if user not in (
-            ChatMemberStatus.LEFT, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR, ChatMemberStatus.MEMBER):
-        await bot.send_message(event.chat.id,
-                               f"Привет {name}, если тебя не замутил админ, то ты пропустил сообщение с кнопкой при первом входе, найди его с помощью \"<code>@</code>\" в поиске.")
+    if user in (ChatMemberStatus.LEFT, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR, ChatMemberStatus.MEMBER):
+        return
+
+    if await restrictions.isCasBan(event.from_user.id):
+        await event.chat.ban(user_id=event.from_user.id)
+        return
+
+    await bot.send_message(event.chat.id,
+                           f"Привет {name}, если тебя не замутил админ, то ты пропустил сообщение с кнопкой при первом входе, найди его с помощью \"<code>@</code>\" в поиске.")

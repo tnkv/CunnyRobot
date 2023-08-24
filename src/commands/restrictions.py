@@ -1,11 +1,13 @@
 from time import time
 
+import aiohttp
 from aiogram import Router
 from aiogram.enums import ChatMemberStatus
 from aiogram.filters import Command
 from aiogram.types import Message, ChatPermissions
 
 router = Router()
+CAS_LINK = "https://api.cas.chat/check?user_id={user_id}"
 
 
 # Бан
@@ -26,7 +28,6 @@ async def command_ban(message: Message):
 # Мут
 @router.message(Command(commands=["mute", "m"]))
 async def command_mute(message: Message):
-
     initiator = (await message.chat.get_member(user_id=message.from_user.id)).status
     if initiator not in (ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR):
         await message.reply("Ты не админ.")
@@ -78,6 +79,17 @@ async def command_mute(message: Message):
                                                             can_add_web_page_previews=True))
 
 
+@router.message(Command(commands=["is_cas_ban"]))
+async def command_mute(message: Message):
+    msg = message.text.split(" ")
+    if len(msg) < 2:
+        await message.reply("Необходимо указать Telegram ID пользователя через пробел")
+        return
+    if not msg[1].isdigit():
+        await message.reply("Некорректный Telegram ID")
+        return
+    await message.reply(f"Статус блокировки в CAS: {await isCasBan(int(msg[1]))}")
+
 # Перевод времени для темпмута
 def getRestrictTime(duration):
     unit = duration[-1]
@@ -86,3 +98,12 @@ def getRestrictTime(duration):
     value = int(duration[:-1])
     coefficient = {"m": 60, "h": 3600, "d": 86400}
     return int(time()) + value * coefficient[unit]
+
+# Проверка наличия пользователя в базе CAS
+async def isCasBan(TelegramUserID: int) -> bool:
+    session = aiohttp.ClientSession()
+    async with session.get(CAS_LINK.format(user_id=TelegramUserID)) as resp:
+        answer = await resp.json(content_type='application/json')
+        await session.close()
+
+    return answer.get("ok", False)
