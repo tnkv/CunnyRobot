@@ -32,7 +32,7 @@ async def command_tribunal(message: Message) -> None:
         await message.reply("У пользователя иммунитет от трибунала")
         return
 
-    if not tribunalizable.can_send_messages:  # Вдруг юзер уже в муте/бане
+    if tribunalizable.status in (ChatMemberStatus.RESTRICTED,) and not tribunalizable.can_send_messages:  # Вдруг юзер уже в муте/бане
         await message.reply("Невозможно начать трибунал, пользователь уже ограничен.")
         return
 
@@ -77,8 +77,8 @@ async def command_tribunal(message: Message) -> None:
         await message.answer(
             f"Голосование за мут {name} закончилось с {muteVotes}% голосов за, но для мута требуется хотя бы 66%, пользователь не будет замучен.")
         return
-    tribunalizable = (await message.chat.get_member(user_id=message.reply_to_message.from_user.id)).can_send_messages  # Обновляю инфу окончательно, а то пока был трибунал его могли замутить
-    if not tribunalizable:
+    tribunalizable = await message.chat.get_member(user_id=message.reply_to_message.from_user.id)  # Обновляю инфу окончательно, а то пока был трибунал его могли замутить
+    if tribunalizable.status in (ChatMemberStatus.RESTRICTED,) and not tribunalizable.can_send_messages:
         await message.reply("Трибунал завершён, но во время ожидания пользователь получил другое наказание.")
         return
     try:
