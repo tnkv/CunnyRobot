@@ -39,21 +39,21 @@ async def command_tribunal(message: Message) -> None:
         await message.reply(f"Перед началом нового трибунала, подождите {tribunalTimeout - int(time())} секунд.")
         return
 
-    endTime = int(time() + 90)
-    await database.setTribunalTimeout(message.chat.id, endTime + 90)  # Обновление таймаута для трибунала
+    endTime = time() + 90
+    await database.setTribunalTimeout(message.chat.id, int(endTime) + 90)  # Обновление таймаута для трибунала
     msg = await message.bot.send_poll(chat_id=message.chat.id,
                                       reply_to_message_id=message.reply_to_message.message_id,
                                       question=f"Трибунал ({nameformat.nameFormat(message.reply_to_message.from_user.id, message.reply_to_message.from_user.username, message.reply_to_message.from_user.first_name, message.reply_to_message.from_user.last_name, False)})",
                                       options=["За", "Против"],
                                       is_anonymous=False,
-                                      reply_markup=keyboards.cancel_tribunal_keyboard(endTime - int(time())))
-    while int(time()) < endTime:
-        await asyncio.sleep(5)
+                                      reply_markup=keyboards.cancel_tribunal_keyboard(int(endTime) - int(time())))
+    while time() < endTime:
+        await asyncio.sleep(min(5.0, endTime - time()))
         if await database.getTribunalTimeout(
                 message.chat.id) < time():  # Проверка что трибунал не был отменён администратором
             return
 
-        await msg.edit_reply_markup(reply_markup=keyboards.cancel_tribunal_keyboard(endTime - int(time())))
+        await msg.edit_reply_markup(reply_markup=keyboards.cancel_tribunal_keyboard(int(endTime) - int(time())))
 
     poll = await message.bot.stop_poll(chat_id=message.chat.id, message_id=msg.message_id,
                                        reply_markup=keyboards.ended_tribunal_keyboard())
