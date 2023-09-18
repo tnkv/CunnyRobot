@@ -1,7 +1,5 @@
-import os
 from time import time
 
-from aiogram import Bot
 from aiogram import Router
 from aiogram.enums import ChatMemberStatus
 from aiogram.filters import ChatMemberUpdatedFilter, IS_NOT_MEMBER, ADMINISTRATOR, MEMBER, RESTRICTED
@@ -10,7 +8,6 @@ from aiogram.types import ChatMemberUpdated, ChatPermissions
 from src.commands import restrictions
 from src.utils import keyboards, database, nameformat
 
-bot = Bot(token=os.getenv('TOKEN'), parse_mode="HTML")
 router = Router()
 
 
@@ -38,10 +35,11 @@ async def event_new_member(event: ChatMemberUpdated):
                                      event.from_user.username,
                                      event.from_user.first_name,
                                      event.from_user.last_name)
-        await bot.send_message(event.chat.id, (welcomeMessage.format(user=f"{name}")
-                                               if "{user}" in welcomeMessage else welcomeMessage),
-                               reply_markup=keyboards.captcha_keyboard(int(time()), event.from_user.id, event.chat.id),
-                               disable_web_page_preview=True)
+        await event.bot.send_message(event.chat.id, (welcomeMessage.format(user=f"{name}")
+                                                     if "{user}" in welcomeMessage else welcomeMessage),
+                                     reply_markup=keyboards.captcha_keyboard(int(time()), event.from_user.id,
+                                                                             event.chat.id),
+                                     disable_web_page_preview=True)
     except Exception:
         return
 
@@ -62,12 +60,13 @@ async def event_new_member_restricted(event: ChatMemberUpdated):
                                  event.from_user.last_name)
 
     user = (await event.chat.get_member(user_id=event.from_user.id)).status
-    if user in (ChatMemberStatus.LEFT, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR, ChatMemberStatus.MEMBER):
+    if user in (
+            ChatMemberStatus.LEFT, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR, ChatMemberStatus.MEMBER):
         return
 
     if await restrictions.isCasBan(event.from_user.id):
         await event.chat.ban(user_id=event.from_user.id)
         return
 
-    await bot.send_message(event.chat.id,
-                           f"Привет {name}, если тебя не замутил админ, то ты пропустил сообщение с кнопкой при первом входе, найди его с помощью \"<code>@</code>\" в поиске.")
+    await event.bot.send_message(event.chat.id,
+                                 f"Привет {name}, если тебя не замутил админ, то ты пропустил сообщение с кнопкой при первом входе, найди его с помощью \"<code>@</code>\" в поиске.")

@@ -1,8 +1,6 @@
 import asyncio
-import os
 from time import time
 
-from aiogram import Bot
 from aiogram import Router
 from aiogram.enums import ChatMemberStatus
 from aiogram.filters import Command
@@ -10,7 +8,6 @@ from aiogram.types import Message, ChatPermissions
 
 from src.utils import keyboards, database, nameformat
 
-bot = Bot(token=os.getenv('TOKEN'), parse_mode="HTML")
 router = Router()
 
 
@@ -32,7 +29,8 @@ async def command_tribunal(message: Message) -> None:
         await message.reply("У пользователя иммунитет от трибунала")
         return
 
-    if tribunalizable.status in (ChatMemberStatus.RESTRICTED,) and not tribunalizable.can_send_messages:  # Вдруг юзер уже в муте/бане
+    if tribunalizable.status in (
+            ChatMemberStatus.RESTRICTED,) and not tribunalizable.can_send_messages:  # Вдруг юзер уже в муте/бане
         await message.reply("Невозможно начать трибунал, пользователь уже ограничен.")
         return
 
@@ -43,12 +41,12 @@ async def command_tribunal(message: Message) -> None:
 
     endTime = int(time() + 90)
     await database.setTribunalTimeout(message.chat.id, endTime + 90)  # Обновление таймаута для трибунала
-    msg = await bot.send_poll(chat_id=message.chat.id,
-                              reply_to_message_id=message.reply_to_message.message_id,
-                              question=f"Трибунал ({nameformat.nameFormat(message.reply_to_message.from_user.id, message.reply_to_message.from_user.username, message.reply_to_message.from_user.first_name, message.reply_to_message.from_user.last_name, False)})",
-                              options=["За", "Против"],
-                              is_anonymous=False,
-                              reply_markup=keyboards.cancel_tribunal_keyboard(endTime - int(time())))
+    msg = await message.bot.send_poll(chat_id=message.chat.id,
+                                      reply_to_message_id=message.reply_to_message.message_id,
+                                      question=f"Трибунал ({nameformat.nameFormat(message.reply_to_message.from_user.id, message.reply_to_message.from_user.username, message.reply_to_message.from_user.first_name, message.reply_to_message.from_user.last_name, False)})",
+                                      options=["За", "Против"],
+                                      is_anonymous=False,
+                                      reply_markup=keyboards.cancel_tribunal_keyboard(endTime - int(time())))
     while int(time()) < endTime:
         await asyncio.sleep(5)
         if await database.getTribunalTimeout(
@@ -57,8 +55,8 @@ async def command_tribunal(message: Message) -> None:
 
         await msg.edit_reply_markup(reply_markup=keyboards.cancel_tribunal_keyboard(endTime - int(time())))
 
-    poll = await bot.stop_poll(chat_id=message.chat.id, message_id=msg.message_id,
-                               reply_markup=keyboards.ended_tribunal_keyboard())
+    poll = await message.bot.stop_poll(chat_id=message.chat.id, message_id=msg.message_id,
+                                       reply_markup=keyboards.ended_tribunal_keyboard())
 
     name = nameformat.nameFormat(message.reply_to_message.from_user.id,
                                  message.reply_to_message.from_user.username,
@@ -77,7 +75,8 @@ async def command_tribunal(message: Message) -> None:
         await message.answer(
             f"Голосование за мут {name} закончилось с {muteVotes}% голосов за, но для мута требуется хотя бы 66%, пользователь не будет замучен.")
         return
-    tribunalizable = await message.chat.get_member(user_id=message.reply_to_message.from_user.id)  # Обновляю инфу окончательно, а то пока был трибунал его могли замутить
+    tribunalizable = await message.chat.get_member(
+        user_id=message.reply_to_message.from_user.id)  # Обновляю инфу окончательно, а то пока был трибунал его могли замутить
     if tribunalizable.status in (ChatMemberStatus.RESTRICTED,) and not tribunalizable.can_send_messages:
         await message.reply("Трибунал завершён, но во время ожидания пользователь получил другое наказание.")
         return

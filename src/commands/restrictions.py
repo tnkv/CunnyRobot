@@ -95,6 +95,7 @@ async def command_mute(message: Message):
     except Exception:
         await message.reply("Не удалось снять огранчиения.")
 
+
 @router.message(Command(commands=["is_cas_ban"]))
 async def command_mute(message: Message):
     msg = message.text.split(" ")
