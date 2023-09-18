@@ -28,17 +28,19 @@ async def command_give_admin(message: Message) -> None:
 # Проверка наличия иммунитета
 @router.message(Command(commands=["check"]))
 async def command_check(message: Message) -> None:
-    initiator = (await message.chat.get_member(user_id=message.from_user.id)).status
+    isInitiatorAdmin = (await message.chat.get_member(user_id=message.from_user.id)).status in (ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR)
 
     if not message.reply_to_message:
         await message.reply(
-            f"Наличие иммунитета к трибуналу: {await database.isImmune(message.chat.id, message.from_user.id)}")
+            f'Наличие иммунитета к трибуналу: {isInitiatorAdmin or await database.isImmune(message.chat.id, message.from_user.id)}')
         return
-    if initiator not in (ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR):
+    if not isInitiatorAdmin:
         await message.reply("Ты не админ.")
         return
+
+    isTargetAdmin = (await message.chat.get_member(user_id=message.reply_to_message.from_user.id)).status in (ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR)
     await message.reply(
-        f"Наличие иммунитета к трибуналу: {await database.isImmune(message.chat.id, message.reply_to_message.from_user.id)}")
+        f"Наличие иммунитета к трибуналу: {isTargetAdmin or await database.isImmune(message.chat.id, message.reply_to_message.from_user.id)}")
 
 
 # Отмена иммунитета
