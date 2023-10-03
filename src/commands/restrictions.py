@@ -7,45 +7,45 @@ from aiogram.filters import Command
 from aiogram.types import Message, ChatPermissions
 
 router = Router()
-CAS_LINK = "https://api.cas.chat/check?user_id={user_id}"
-
+CAS_LINK = 'https://api.cas.chat/check?user_id={user_id}'
+TIME_COEFFICIENT = {'m': 60, 'h': 3600, 'd': 86400, 'w': 604800}
 
 # Бан
-@router.message(Command("ban"))
-async def command_ban(message: Message):
+@router.message(Command('ban'))
+async def command_ban(message: Message) -> None:
     initiator = (await message.chat.get_member(user_id=message.from_user.id)).status
     if initiator not in (ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR):
-        await message.reply("Ты не админ.")
+        await message.reply('Ты не админ.')
         return
 
     if message.reply_to_message:
         await message.chat.ban(user_id=message.reply_to_message.from_user.id)
         return
 
-    msg = message.text.split(" ")
+    msg = message.text.split(' ')
     if len(msg) >= 2 and msg[1].isdigit():
         try:
             await message.chat.ban(user_id=int(msg[1]))
         except Exception:
-            await message.reply("Не удалось заблокировать пользователя.")
+            await message.reply('Не удалось заблокировать пользователя.')
         return
     await message.reply(
-        "Для блокировки пользователя необходимо ответить на сообщение или написать Telegram ID через пробел.")
+        'Для блокировки пользователя необходимо ответить на сообщение или написать Telegram ID через пробел.')
 
 
 # Мут
-@router.message(Command(commands=["mute", "m"]))
-async def command_mute(message: Message):
+@router.message(Command(commands=['mute', 'm']))
+async def command_mute(message: Message) -> None:
     initiator = (await message.chat.get_member(user_id=message.from_user.id)).status
     if initiator not in (ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR):
-        await message.reply("Ты не админ.")
+        await message.reply('Ты не админ.')
         return
 
     if not message.reply_to_message:
-        await message.reply("А ответить на сообщение?")
+        await message.reply('А ответить на сообщение?')
         return
 
-    msg = message.text.split(" ")
+    msg = message.text.split(' ')
     if len(msg) < 2:
         await message.chat.restrict(user_id=message.reply_to_message.from_user.id,
                                     until_date=0,
@@ -58,22 +58,22 @@ async def command_mute(message: Message):
 
 
 # Анбан/анмут
-@router.message(Command(commands=["unmute", "um", "unban"]))
-async def command_mute(message: Message):
+@router.message(Command(commands=['unmute', 'um', 'unban']))
+async def command_mute(message: Message) -> None:
     initiator = (await message.chat.get_member(user_id=message.from_user.id)).status
     if initiator not in (ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR):
-        await message.reply("Ты не админ.")
+        await message.reply('Ты не админ.')
         return
 
     if message.reply_to_message:
         TelegramID = message.reply_to_message.from_user.id
     else:
-        msg = message.text.split(" ")
+        msg = message.text.split(' ')
         if len(msg) >= 2 and msg[1].isdigit():
             TelegramID = int(msg[1])
         else:
             await message.reply(
-                "Для снятия ограничений необходимо ответить на сообщение или написать Telegram ID через пробел.")
+                'Для снятия ограничений необходимо ответить на сообщение или написать Telegram ID через пробел.')
             return
     try:
         await message.chat.restrict(user_id=TelegramID,
@@ -93,29 +93,26 @@ async def command_mute(message: Message):
                                                                 can_send_voice_notes=True,
                                                                 can_add_web_page_previews=True))
     except Exception:
-        await message.reply("Не удалось снять огранчиения.")
+        await message.reply('Не удалось снять огранчиения.')
 
 
-@router.message(Command(commands=["is_cas_ban"]))
-async def command_mute(message: Message):
-    msg = message.text.split(" ")
+@router.message(Command(commands=['is_cas_ban']))
+async def command_mute(message: Message) -> None:
+    msg = message.text.split(' ')
     if len(msg) < 2:
-        await message.reply("Необходимо указать Telegram ID пользователя через пробел")
+        await message.reply('Необходимо указать Telegram ID пользователя через пробел')
         return
     if not msg[1].isdigit():
-        await message.reply("Некорректный Telegram ID")
+        await message.reply('Некорректный Telegram ID')
         return
-    await message.reply(f"Статус блокировки в CAS: {await isCasBan(int(msg[1]))}")
+    await message.reply(f'Статус блокировки в CAS: {await isCasBan(int(msg[1]))}')
 
 
 # Перевод времени для темпмута
-def getRestrictTime(duration):
+def getRestrictTime(duration: str) -> int:
     unit = duration[-1]
-    if unit not in ("m", "h", "d"):
-        return 0
-    value = int(duration[:-1])
-    coefficient = {"m": 60, "h": 3600, "d": 86400}
-    return int(time()) + value * coefficient[unit]
+    value = int(duration[:-1]) if duration[:-1].isdigit() else 0
+    return int(time()) + value * TIME_COEFFICIENT.get(unit, 0)
 
 
 # Проверка наличия пользователя в базе CAS
@@ -125,4 +122,4 @@ async def isCasBan(TelegramUserID: int) -> bool:
         answer = await resp.json(content_type='application/json')
         await session.close()
 
-    return answer.get("ok", False)
+    return answer.get('ok', False)

@@ -12,17 +12,17 @@ router = Router()
 
 # Обработка кнопки в капче
 @router.callback_query(CaptchaCallbackFactory.filter())  # Принимаю калбек команды
-async def callback_captcha(callback: CallbackQuery, callback_data: CaptchaCallbackFactory):
+async def callback_captcha(callback: CallbackQuery, callback_data: CaptchaCallbackFactory) -> None:
     date = callback_data.date
     actualDate = int(time())
     user = callback_data.user
     chat = callback_data.chat
     if callback.from_user.id != user:
-        await callback.answer(text="Эта кнопка не для тебя.", show_alert=True)
+        await callback.answer(text='Эта кнопка не для тебя.', show_alert=True)
         return
 
     if date + 60 >= actualDate:
-        await callback.answer(text=f"Кнопка заработает через {date + 60 - actualDate} секунд.", show_alert=True)
+        await callback.answer(text=f'Кнопка заработает через {date + 60 - actualDate} секунд.', show_alert=True)
         return
 
     await callback.answer()
@@ -49,8 +49,8 @@ async def callback_captcha(callback: CallbackQuery, callback_data: CaptchaCallba
 
 
 # Обработка отмены трибунала
-@router.callback_query(F.data == "cancel_tribunal")
-async def callback_cancel_tribunal(callback: CallbackQuery):
+@router.callback_query(F.data == 'cancel_tribunal')
+async def callback_cancel_tribunal(callback: CallbackQuery) -> None:
     initiator = (await callback.message.chat.get_member(user_id=callback.from_user.id)).status
     if initiator not in (ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR):
         await callback.answer()
@@ -68,7 +68,6 @@ async def callback_cancel_tribunal(callback: CallbackQuery):
         return
 
 
-@router.callback_query(F.data == "ended_tribunal")
-@router.callback_query(F.data == "canceled_tribunal")
-async def callback_no_answer(callback: CallbackQuery):
+@router.callback_query(F.data.in_('canceled_tribunal', 'ended_tribunal'))
+async def callback_no_answer(callback: CallbackQuery) -> None:
     await callback.answer()

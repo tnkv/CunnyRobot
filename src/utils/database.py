@@ -1,7 +1,7 @@
 import json
 import sqlite3 as sq
 
-conn = sq.connect("tribunalbot.db")
+conn = sq.connect('tribunalbot.db')
 cur = conn.cursor()
 
 
@@ -16,7 +16,7 @@ async def addChat(TelegramChatID: int) -> None:
     if not records:
         cur.execute('INSERT INTO TribunalBot VALUES(?,?,?,?)',
                     (TelegramChatID, json.dumps((777000,)),
-                     "{user}\nНажми на кнопку ниже, чтобы подтвердить, что ты не бот.", 0))
+                     '{user}\nНажми на кнопку ниже, чтобы подтвердить, что ты не бот.', 0))
         conn.commit()
 
 
@@ -73,7 +73,7 @@ async def setCaptchaText(TelegramChatID: int, CaptchaText: str) -> None:
 async def getCaptchaText(TelegramChatID: int) -> str:
     cur.execute('SELECT * FROM TribunalBot WHERE TelegramChatID = ?', (TelegramChatID,))
     records = cur.fetchall()
-    return records[0][2] if records else "{user}\nНажми на кнопку ниже, чтобы подтвердить, что ты не бот."
+    return records[0][2] if records else '{user}\nНажми на кнопку ниже, чтобы подтвердить, что ты не бот.'
 
 
 async def setTribunalTimeout(TelegramChatID: int, date: int) -> None:
