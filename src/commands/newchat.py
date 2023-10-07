@@ -2,11 +2,12 @@ from time import time
 
 from aiogram import Router
 from aiogram.enums import ChatMemberStatus
-from aiogram.filters import ChatMemberUpdatedFilter, IS_NOT_MEMBER, ADMINISTRATOR, MEMBER, RESTRICTED, JOIN_TRANSITION
+from aiogram.filters import ChatMemberUpdatedFilter, IS_NOT_MEMBER, ADMINISTRATOR, MEMBER, JOIN_TRANSITION
 from aiogram.types import ChatMemberUpdated, ChatPermissions
 
 from src.commands import restrictions
 from src.utils import keyboards, database, nameformat
+from src.utils.ChatInfo import ChatInfo
 
 router = Router()
 
@@ -23,8 +24,29 @@ async def event_new_member(event: ChatMemberUpdated) -> None:
     if await restrictions.isCasBan(event.from_user.id):
         await event.chat.ban(user_id=event.from_user.id)
 
-    welcomeMessage = await database.getCaptchaText(event.chat.id)
-    if welcomeMessage == 'disable':
+    chat_info = ChatInfo(database.getChatInfo(event.chat.id))
+
+    if chat_info.is_comments:
+        await event.chat.ban(user_id=event.from_user.id)
+        await event.chat.restrict(user_id=event.from_user.id,
+                                  until_date=0,
+                                  permissions=ChatPermissions(can_send_messages=True,
+                                                              can_pin_messages=True,
+                                                              can_send_other_messages=True,
+                                                              can_send_polls=True,
+                                                              can_change_info=True,
+                                                              can_invite_users=True,
+                                                              can_send_audios=True,
+                                                              can_send_photos=True,
+                                                              can_send_videos=True,
+                                                              can_manage_topics=True,
+                                                              can_send_documents=True,
+                                                              can_send_video_notes=True,
+                                                              can_send_voice_notes=True,
+                                                              can_add_web_page_previews=True))
+        return
+
+    if not chat_info.welcome_message:
         return
 
     member = await event.chat.get_member(user_id=event.from_user.id)
@@ -41,8 +63,15 @@ async def event_new_member(event: ChatMemberUpdated) -> None:
         await event.chat.restrict(user_id=event.from_user.id,
                                   until_date=0,
                                   permissions=ChatPermissions(can_send_messages=False))
-        await event.bot.send_message(event.chat.id, (welcomeMessage.format(user=name) if '{user}' in welcomeMessage else welcomeMessage),
-                                     reply_markup=keyboards.captcha_keyboard(int(time()), event.from_user.id, event.chat.id),
+        welcome_message_text = chat_info.welcome_message_text.format(
+            user=name) if '{user}' in chat_info.welcome_message_text else chat_info.welcome_message_text
+
+        await event.bot.send_message(event.chat.id,
+                                     welcome_message_text,
+                                     reply_markup=keyboards.captcha_keyboard(
+                                         int(time()) + chat_info.welcome_message_timeout,
+                                         event.from_user.id,
+                                         event.chat.id),
                                      disable_web_page_preview=True)
     except Exception:
         return
