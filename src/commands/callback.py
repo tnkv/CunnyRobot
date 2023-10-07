@@ -1,28 +1,31 @@
 from aiogram import Router, F
 from aiogram.enums import ChatMemberStatus
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import CallbackQuery, ChatPermissions
 
 from time import time
 
-from src.utils import database, keyboards, nameformat
+from src.utils import database, keyboards, nameformat, inflect_with_num
 from src.utils.CaptchaCallbackFactory import CaptchaCallbackFactory
+from src.utils.ChatInfo import ChatInfo
 
 router = Router()
 
 
 # Обработка кнопки в капче
 @router.callback_query(CaptchaCallbackFactory.filter())  # Принимаю калбек команды
-async def callback_captcha(callback: CallbackQuery, callback_data: CaptchaCallbackFactory):
+async def callback_captcha(callback: CallbackQuery, callback_data: CaptchaCallbackFactory) -> None:
     date = callback_data.date
-    actualDate = int(time())
+    date_now = int(time())
     user = callback_data.user
     chat = callback_data.chat
     if callback.from_user.id != user:
-        await callback.answer(text="Эта кнопка не для тебя.", show_alert=True)
+        await callback.answer(text='Эта кнопка не для тебя.', show_alert=True)
         return
 
-    if date + 60 >= actualDate:
-        await callback.answer(text=f"Кнопка заработает через {date + 60 - actualDate} секунд.", show_alert=True)
+    if date_now < date:
+        await callback.answer(text=f'Кнопка заработает через {inflect_with_num.inflect_with_num(date - date_now, ("секунда", "cекунд", "cекунды"))}',
+                              show_alert=True)
         return
 
     await callback.answer()
@@ -49,13 +52,17 @@ async def callback_captcha(callback: CallbackQuery, callback_data: CaptchaCallba
 
 
 # Обработка отмены трибунала
-@router.callback_query(F.data == "cancel_tribunal")
-async def callback_cancel_tribunal(callback: CallbackQuery):
+@router.callback_query(F.data == 'cancel_tribunal')
+async def callback_cancel_tribunal(callback: CallbackQuery) -> None:
     initiator = (await callback.message.chat.get_member(user_id=callback.from_user.id)).status
     if initiator not in (ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR):
         await callback.answer()
         return
-    await database.setTribunalTimeout(callback.message.chat.id, int(time()))
+
+    chat_info = ChatInfo(database.getChatInfo(callback.message.chat.id))
+    chat_info.set_tribunal_timeout(int(time()))
+    database.setChatInfo(chat_info.export())
+
     try:
         name = nameformat.nameFormat(callback.from_user.id,
                                      callback.from_user.username,
@@ -68,7 +75,39 @@ async def callback_cancel_tribunal(callback: CallbackQuery):
         return
 
 
-@router.callback_query(F.data == "ended_tribunal")
-@router.callback_query(F.data == "canceled_tribunal")
-async def callback_no_answer(callback: CallbackQuery):
+@router.callback_query(F.data == 'canceled_tribunal' or
+                       F.data == 'ended_tribunal' or
+                       F.data == 'confirm' or
+                       F.data == 'unconfirm')
+async def callback_no_answer(callback: CallbackQuery) -> None:
+    await callback.answer()
+
+
+@router.callback_query(F.data == 'settings_enter_btn')
+async def callback_enter(callback: CallbackQuery) -> None:
+    initiator = (await callback.bot.get_chat_member(chat_id=callback.message.chat.id,
+                                                    user_id=callback.from_user.id)).status
+    if initiator in (ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR):
+        chat_info = ChatInfo(database.getChatInfo(callback.message.chat.id))
+        try:
+            await callback.message.edit_reply_markup(callback.inline_message_id,
+                                                     reply_markup=keyboards.configuration_welcome_keyboard(chat_info))
+        except TelegramBadRequest:
+            pass
+
+    await callback.answer()
+
+
+@router.callback_query(F.data == 'settings_main_btn')
+async def callback_settings(callback: CallbackQuery) -> None:
+    initiator = (await callback.bot.get_chat_member(chat_id=callback.message.chat.id,
+                                                    user_id=callback.from_user.id)).status
+    if initiator in (ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR):
+        chat_info = ChatInfo(database.getChatInfo(callback.message.chat.id))
+        try:
+            await callback.message.edit_reply_markup(callback.inline_message_id,
+                                                     reply_markup=keyboards.configuration_main_keyboard(chat_info))
+        except TelegramBadRequest:
+            pass
+
     await callback.answer()
