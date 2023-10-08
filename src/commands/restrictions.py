@@ -19,6 +19,10 @@ async def command_ban(message: Message) -> None:
         return
 
     if message.reply_to_message:
+        if message.reply_to_message.from_user.id == 136817688 and message.reply_to_message.sender_chat:
+            await message.chat.ban_sender_chat(message.reply_to_message.sender_chat.id)
+            return
+
         await message.chat.ban(user_id=message.reply_to_message.from_user.id)
         return
 
@@ -66,6 +70,10 @@ async def command_mute(message: Message) -> None:
         return
 
     if message.reply_to_message:
+        if message.from_user.id == 136817688 and message.reply_to_message.sender_chat:
+            await message.chat.unban_sender_chat(message.reply_to_message.sender_chat.id)
+            return
+
         TelegramID = message.reply_to_message.from_user.id
     else:
         msg = message.text.split(' ')
