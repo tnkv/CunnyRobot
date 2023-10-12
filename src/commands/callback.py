@@ -53,7 +53,7 @@ async def callback_captcha(callback: CallbackQuery, callback_data: CaptchaCallba
 
 
 # Обработка отмены трибунала
-@router.callback_query(F.data == 'cancel_tribunal', admin_filter.CallbackAdminFilter())
+@router.callback_query(F.data == 'cancel_tribunal', admin_filter.CallbackAdminFilter(False))
 async def callback_cancel_tribunal(callback: CallbackQuery) -> None:
     chat_info = ChatInfo(database.getChatInfo(callback.message.chat.id))
     chat_info.set_tribunal_timeout(int(time()))

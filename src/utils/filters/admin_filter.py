@@ -17,12 +17,15 @@ class AdminFilter(BaseFilter):
 
 
 class CallbackAdminFilter(BaseFilter):
-    def __init__(self):
-        pass
+    def __init__(self, need_notify=True):
+        self.need_notify = need_notify
 
     async def __call__(self, callback: CallbackQuery) -> bool:
-        if not await check_rights.is_admin(callback.from_user.id, callback.message):
-            await callback.answer('Ты не админ.')
-            return False
+        if await check_rights.is_admin(callback.from_user.id, callback.message):
+            return True
 
-        return True
+        if self.need_notify:
+            await callback.answer('Ты не админ.')
+
+        await callback.answer()
+        return False

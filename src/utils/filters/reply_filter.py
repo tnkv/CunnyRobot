@@ -1,8 +1,6 @@
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
 
-from src.utils import check_rights
-
 
 class NeedReplyFilter(BaseFilter):
     def __init__(self):
