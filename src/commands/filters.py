@@ -1,9 +1,8 @@
 from aiogram import Router
-from aiogram.enums import ChatMemberStatus
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
 
-from src.utils import database
+from src.utils import database, check_rights
 
 router = Router()
 
@@ -21,7 +20,7 @@ class CommentsFilter(BaseFilter):
         if not database.is_comments(message.chat.id):
             return False
 
-        is_admin = (await message.chat.get_member(user_id=message.from_user.id)).status in (ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR)
+        is_admin = await check_rights.is_admin(message.from_user.id, message)
         is_service = message.content_type in service_message_types
         is_bannable = not message.reply_to_message and not message.is_automatic_forward and (not is_admin or is_service)
         return is_bannable

@@ -6,7 +6,7 @@ from aiogram.enums import ChatMemberStatus
 from aiogram.filters import Command
 from aiogram.types import Message, ChatPermissions
 
-from src.utils import keyboards, database, nameformat
+from src.utils import keyboards, database, nameformat, inflect_with_num
 from src.utils.ChatInfo import ChatInfo
 
 router = Router()
@@ -90,11 +90,13 @@ async def command_tribunal(message: Message) -> None:
         await message.reply('Трибунал завершён, но во время ожидания пользователь получил другое наказание.')
         return
     try:
+        mute_period = (votes["За"] * 2) - votes["Против"]
+        mute_period_inflected = inflect_with_num.inflect_with_num(mute_period, ('минуту', 'минут', 'минуты'))
         await message.bot.restrict_chat_member(chat_id=message.chat.id,
                                                user_id=message.reply_to_message.from_user.id,
-                                               until_date=(int(time()) + ((votes['За'] * 2 - votes['Против']) * 60)),
+                                               until_date=(int(time()) + mute_period * 60),
                                                permissions=ChatPermissions(can_send_messages=False))
         await message.answer(
-            f'Голосование за мут {name} закончилось с {muteVotes}% голосов за, пользователь отправляется в мут на {(votes["За"] * 2) - votes["Против"]} минут.')
+            f'Голосование за мут {name} закончилось с {muteVotes}% голосов за, пользователь отправляется в мут на {mute_period_inflected}.')
     except Exception:
         pass

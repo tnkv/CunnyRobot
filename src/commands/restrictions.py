@@ -2,22 +2,18 @@ from time import time
 
 import aiohttp
 from aiogram import Router
-from aiogram.enums import ChatMemberStatus
 from aiogram.filters import Command
 from aiogram.types import Message, ChatPermissions
+
+from src.utils.filters import admin_filter, reply_filter
 
 router = Router()
 CAS_LINK = 'https://api.cas.chat/check?user_id={user_id}'
 TIME_COEFFICIENT = {'m': 60, 'h': 3600, 'd': 86400, 'w': 604800}
 
 # Бан
-@router.message(Command('ban'))
+@router.message(Command('ban'), admin_filter.AdminFilter())
 async def command_ban(message: Message) -> None:
-    initiator = (await message.chat.get_member(user_id=message.from_user.id)).status
-    if initiator not in (ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR):
-        await message.reply('Ты не админ.')
-        return
-
     if message.reply_to_message:
         if message.reply_to_message.from_user.id == 136817688 and message.reply_to_message.sender_chat:
             await message.chat.ban_sender_chat(message.reply_to_message.sender_chat.id)
@@ -38,17 +34,8 @@ async def command_ban(message: Message) -> None:
 
 
 # Мут
-@router.message(Command(commands=['mute', 'm']))
+@router.message(Command(commands=['mute', 'm']), admin_filter.AdminFilter(), reply_filter.NeedReplyFilter())
 async def command_mute(message: Message) -> None:
-    initiator = (await message.chat.get_member(user_id=message.from_user.id)).status
-    if initiator not in (ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR):
-        await message.reply('Ты не админ.')
-        return
-
-    if not message.reply_to_message:
-        await message.reply('А ответить на сообщение?')
-        return
-
     msg = message.text.split(' ')
     if len(msg) < 2:
         await message.chat.restrict(user_id=message.reply_to_message.from_user.id,
@@ -62,13 +49,8 @@ async def command_mute(message: Message) -> None:
 
 
 # Анбан/анмут
-@router.message(Command(commands=['unmute', 'um', 'unban']))
+@router.message(Command(commands=['unmute', 'um', 'unban']), admin_filter.AdminFilter())
 async def command_mute(message: Message) -> None:
-    initiator = (await message.chat.get_member(user_id=message.from_user.id)).status
-    if initiator not in (ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR):
-        await message.reply('Ты не админ.')
-        return
-
     if message.reply_to_message:
         if message.from_user.id == 136817688 and message.reply_to_message.sender_chat:
             await message.chat.unban_sender_chat(message.reply_to_message.sender_chat.id)
