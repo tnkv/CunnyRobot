@@ -8,3 +8,10 @@ class CaptchaCallbackFactory(CallbackData, prefix="captcha"):
     date: int
     user: int
     chat: int
+
+
+class FilterslistCallbackFactory(CallbackData, prefix="filter"):
+    """
+    Обработка нажатия на кнопку в списке филтьтров
+    """
+    filter_id: str

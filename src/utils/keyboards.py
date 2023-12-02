@@ -2,7 +2,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from src.utils import ChatInfo
-from src.utils.CaptchaCallbackFactory import CaptchaCallbackFactory
+from src.utils.callback_factory import CaptchaCallbackFactory
 
 
 def cancel_tribunal_keyboard(time: int) -> InlineKeyboardMarkup:
@@ -50,7 +50,7 @@ def configuration_main_keyboard(chat_info: ChatInfo) -> InlineKeyboardMarkup:  #
                    callback_data='comments_settings_btn')
     builder.button(text=f'Настройки входа', callback_data='settings_enter_btn')
     #    builder.button(text=f'Пользователи', callback_data='settings_members_btn')
-    #    builder.button(text=f'Фильтры', callback_data='settings_filters_btn')
+    builder.button(text=f'Фильтры', callback_data='settings_filters_btn')
     builder.adjust(1)
 
     return builder.as_markup()
@@ -64,6 +64,28 @@ def configuration_welcome_keyboard(chat_info: ChatInfo) -> InlineKeyboardMarkup:
     builder.button(text=f'Настроить время', callback_data='enter_time_btn')
     builder.button(text=f'Главное меню', callback_data='settings_main_btn')
     builder.adjust(1)
+
+    return builder.as_markup()
+
+def configuration_filter_keyboard(chat_info: ChatInfo) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.button(text=f'Фильтры: {"включены" if chat_info.filters_enabled else "выключены"}',
+                   callback_data='filters_switch_btn')
+    builder.button(text=f'Список фильтров ({len(chat_info.filters_list)})', callback_data='filters_list_btn')
+    builder.button(text=f'Добавить фильтр', callback_data='filters_add_btn')
+    builder.button(text=f'Главное меню', callback_data='settings_main_btn')
+    builder.adjust(1)
+
+    return builder.as_markup()
+
+
+def configuration_filter_list_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.button(text=f'Удалить фильтр', callback_data='filters_remove_btn')
+    builder.button(text=f'Добавить фильтр', callback_data='filters_add_btn')
+    builder.button(text=f'Назад', callback_data='settings_filters_btn')
+    builder.button(text=f'Главное меню', callback_data='settings_main_btn')
+    builder.adjust(2)
 
     return builder.as_markup()
 
