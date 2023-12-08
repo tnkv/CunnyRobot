@@ -1,4 +1,6 @@
 import json
+import uuid
+
 from config import DEFAULT_CHAT_SETTINGS
 
 
@@ -11,6 +13,10 @@ class ChatInfo:
     welcome_message_timeout = DEFAULT_CHAT_SETTINGS.get('welcome_message_timeout', 60)
     tribunal_immunity = DEFAULT_CHAT_SETTINGS.get('tribunal_immunity', [777000, ])
     is_comments = DEFAULT_CHAT_SETTINGS.get('is_comments', False)
+    ban_channel = DEFAULT_CHAT_SETTINGS.get('ban_channel', False)
+    channel_whitelist = DEFAULT_CHAT_SETTINGS.get('channel_whitelist', [])
+    filters_enabled = DEFAULT_CHAT_SETTINGS.get('filters_enabled', False)
+    filters_list = DEFAULT_CHAT_SETTINGS.get('filters_list', {})
 
     def __init__(self, chat_in_db: list):
         if not chat_in_db:
@@ -25,6 +31,10 @@ class ChatInfo:
         self.welcome_message_timeout: int = chat_settings.get('welcome_message_timeout', self.welcome_message_timeout)
         self.tribunal_immunity: list = chat_settings.get('tribunal_immunity', self.tribunal_immunity)
         self.is_comments: bool = chat_settings.get('is_comments', self.is_comments)
+        self.ban_channel: bool = chat_settings.get('ban_channel', self.ban_channel)
+        self.channel_whitelist: list = chat_settings.get('channel_whitelist', self.channel_whitelist)
+        self.filters_enabled: bool = chat_settings.get('filters_enabled', self.filters_enabled)
+        self.filters_list: dict = chat_settings.get('filters_list', self.filters_list)
 
     def export(self) -> tuple:
         settings = {
@@ -32,7 +42,9 @@ class ChatInfo:
             'welcome_message_text': self.welcome_message_text,
             'welcome_message_timeout': self.welcome_message_timeout,
             'tribunal_immunity': self.tribunal_immunity,
-            'is_comments': self.is_comments
+            'is_comments': self.is_comments,
+            'filters_enabled': self.filters_enabled,
+            'filters_list': self.filters_list
         }
 
         return self.chat_id, self.last_tribunal_end, json.dumps(settings)
@@ -42,6 +54,9 @@ class ChatInfo:
 
     def switch_welcome(self) -> None:
         self.welcome_message = not self.welcome_message
+
+    def switch_filters(self) -> None:
+        self.filters_enabled = not self.filters_enabled
 
     def add_immune(self, telegram_user_id: int) -> bool:
         if telegram_user_id in self.tribunal_immunity:
@@ -65,3 +80,11 @@ class ChatInfo:
 
     def set_welcome_timeout(self, timeout: int):
         self.welcome_message_timeout = timeout
+
+    def add_filter(self, regex: str, full_match: bool = False):
+        self.filters_list[uuid.uuid4().hex] = {
+            'regex': regex,
+            'full_match': full_match}
+
+    def remove_filter(self, id: str):
+        self.filters_list.pop(id)
