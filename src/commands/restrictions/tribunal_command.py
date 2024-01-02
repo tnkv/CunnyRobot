@@ -55,7 +55,7 @@ async def command_tribunal(message: Message, session: AsyncSession) -> None:
         return
 
     end_time = current_time + 90
-
+    timer = current_time
     chat_info.set_tribunal_timeout(end_time + 90)
     await database.set_chat_info(session, chat_info.export())
 
@@ -70,7 +70,8 @@ async def command_tribunal(message: Message, session: AsyncSession) -> None:
                                       is_anonymous=False,
                                       reply_markup=keyboards.cancel_tribunal_keyboard(end_time - int(time())))
     while time() < end_time:
-        await asyncio.sleep(min(5.0, end_time - time()))
+        timer += 5
+        await asyncio.sleep(min(timer - time(), end_time - time()))
         if (ChatInfo(await database.get_chat_info(session, message.chat.id))
                 .last_tribunal_end < time()): return  # Проверка что трибунал не был отменён администратором
 

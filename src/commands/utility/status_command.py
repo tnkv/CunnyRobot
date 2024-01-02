@@ -27,8 +27,8 @@ async def command_status(message: Message, session: AsyncSession) -> None:
              f'OS: {get_os()}\n'
              f'CPU: {psutil.cpu_count()} ({psutil.cpu_freq().max / 1000:.2f}GHz)\n'
              f'RAM: {get_ram()}\n\n'
-             f'System time: {format_time(datetime.now())}\n'
-             f'Startup date: {format_time(startup_time)}\n\n'
+             f'Startup date: {format_time(startup_time)}\n'
+             f'System time: {format_time(datetime.now())}\n\n'
              f'<i>Powered by aiogram ({version("aiogram")})</i>\n'
              f''
     )
