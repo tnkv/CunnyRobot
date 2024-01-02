@@ -3,6 +3,7 @@ import re
 from aiogram import Router
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.utils import database, utils
 from src.utils.ChatInfo import ChatInfo
@@ -17,25 +18,38 @@ service_message_types = [
 
 
 class CommentsFilter(BaseFilter):
-    def __init__(self):
-        pass
 
-    async def __call__(self, message: Message) -> bool:
-        if not database.is_comments(message.chat.id):
+    async def __call__(self, message: Message, session: AsyncSession) -> bool:
+        if message.left_chat_member and message.left_chat_member.id == message.bot.id:
             return False
 
-        is_admin = await utils.is_admin(message.from_user.id, message)
+        if message.is_automatic_forward or message.reply_to_message:
+            return False
+
         is_service = message.content_type in service_message_types
-        is_bannable = not message.reply_to_message and not message.is_automatic_forward and (not is_admin or is_service)
-        return is_bannable
+
+        if await utils.is_admin(message.from_user.id, message) and not is_service:
+            return False
+
+        chat_info = ChatInfo(await database.get_chat_info(session, message.chat.id))
+
+        if not chat_info.is_comments:
+            return False
+
+        return True
 
 
 class CustomFilters(BaseFilter):
-    async def __call__(self, message: Message):
-        chat_info = ChatInfo(database.getChatInfo(message.chat.id))
-        is_admin = await utils.is_admin(message.from_user.id, message)
+    async def __call__(self, message: Message, session: AsyncSession) -> bool:
+        if message.left_chat_member and message.left_chat_member.id == message.bot.id:
+            return False
+        
+        if await utils.is_admin(message.from_user.id, message):
+            return False
 
-        if is_admin or not chat_info.filters_enabled:
+        chat_info = ChatInfo(await database.get_chat_info(session, message.chat.id))
+
+        if not chat_info.filters_enabled:
             return False
 
         for filter_id, details in chat_info.filters_list.items():

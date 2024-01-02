@@ -2,6 +2,7 @@ import json
 import uuid
 
 from config import DEFAULT_CHAT_SETTINGS
+from src.utils.db.models import TribunalBot
 
 
 class ChatInfo:
@@ -18,14 +19,14 @@ class ChatInfo:
     filters_enabled = DEFAULT_CHAT_SETTINGS.get('filters_enabled', False)
     filters_list = DEFAULT_CHAT_SETTINGS.get('filters_list', {})
 
-    def __init__(self, chat_in_db: list):
-        if not chat_in_db:
+    def __init__(self, chat_in_db: TribunalBot | None):
+        if chat_in_db is None:
             return
 
-        self.chat_id: int = chat_in_db[0][0]
-        self.last_tribunal_end: int = chat_in_db[0][1]
+        self.chat_id: int = chat_in_db.TelegramChatID
+        self.last_tribunal_end: int = chat_in_db.LastTribunalEnd
 
-        chat_settings = json.loads(chat_in_db[0][2])
+        chat_settings = json.loads(chat_in_db.ChatSettings)
         self.welcome_message: bool = chat_settings.get('welcome_message', self.welcome_message)
         self.welcome_message_text: str = chat_settings.get('welcome_message_text', self.welcome_message_text)
         self.welcome_message_timeout: int = chat_settings.get('welcome_message_timeout', self.welcome_message_timeout)
@@ -36,7 +37,7 @@ class ChatInfo:
         self.filters_enabled: bool = chat_settings.get('filters_enabled', self.filters_enabled)
         self.filters_list: dict = chat_settings.get('filters_list', self.filters_list)
 
-    def export(self) -> tuple:
+    def export(self) -> TribunalBot:
         settings = {
             'welcome_message': self.welcome_message,
             'welcome_message_text': self.welcome_message_text,
@@ -47,7 +48,10 @@ class ChatInfo:
             'filters_list': self.filters_list
         }
 
-        return self.chat_id, self.last_tribunal_end, json.dumps(settings)
+        return TribunalBot(TelegramChatID=self.chat_id,
+                           LastTribunalEnd=self.last_tribunal_end,
+                           ChatSettings=json.dumps(settings))
+        # return self.chat_id, self.last_tribunal_end, json.dumps(settings)
 
     def switch_comments(self) -> None:
         self.is_comments = not self.is_comments
@@ -86,5 +90,5 @@ class ChatInfo:
             'regex': regex,
             'full_match': full_match}
 
-    def remove_filter(self, id: str):
-        self.filters_list.pop(id)
+    def remove_filter(self, filter_id: str):
+        self.filters_list.pop(filter_id)

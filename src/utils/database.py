@@ -1,35 +1,29 @@
-import json
-import sqlite3 as sq
+from sqlalchemy import select, Result
+from sqlalchemy.ext.asyncio import AsyncSession
 
-import config
-from src.utils.ChatInfo import ChatInfo
-
-conn = sq.connect('tribunalbot.db')
-cur = conn.cursor()
+from src.utils.db import TribunalBot
 
 
-async def initDb() -> None:
-    cur.execute('''CREATE TABLE IF NOT EXISTS TribunalBot
-                  (TelegramChatID INT, LastTribunalEnd INT, ChatSettings TEXT)''')
+async def add_chat(session: AsyncSession, telegram_chat_id: int) -> TribunalBot:
+    request = select(TribunalBot).filter_by(TelegramChatID=telegram_chat_id)
+    result: Result = await session.execute(request)
+    res: TribunalBot = result.scalar_one_or_none()
+
+    if res is not None:
+        return res
+
+    telegram_chat = TribunalBot(TelegramChatID=telegram_chat_id)
+    session.add(telegram_chat)
+    await session.commit()
+    return telegram_chat
 
 
-async def addChat(TelegramChatID: int) -> None:
-    cur.execute('SELECT * FROM TribunalBot WHERE TelegramChatID = ?', (TelegramChatID,))
-    records = cur.fetchall()
-    if not records:
-        cur.execute('INSERT INTO TribunalBot VALUES(?,?,?)',
-                    (TelegramChatID, 0, json.dumps(config.DEFAULT_CHAT_SETTINGS)))
-        conn.commit()
+async def get_chat_info(session: AsyncSession, telegram_chat_id: int) -> TribunalBot | None:
+    request = select(TribunalBot).filter_by(TelegramChatID=telegram_chat_id)
+    result: Result = await session.execute(request)
+    return result.scalar_one_or_none()
 
 
-def getChatInfo(telegram_chat_id: int) -> list:
-    cur.execute('SELECT * FROM TribunalBot WHERE TelegramChatID = ?', (telegram_chat_id,))
-    return cur.fetchall()
-
-def setChatInfo(data: tuple) -> None:
-    cur.execute('UPDATE TribunalBot SET LastTribunalEnd = ?, ChatSettings = ? WHERE TelegramChatID = ?',
-                (data[1], data[2], data[0]))
-    conn.commit()
-
-def is_comments(telegram_chat_id) -> bool:
-    return ChatInfo(getChatInfo(telegram_chat_id)).is_comments
+async def set_chat_info(session: AsyncSession, telegram_chat: TribunalBot) -> None:
+    await session.merge(telegram_chat)
+    await session.commit()

@@ -2,22 +2,29 @@ import asyncio
 import logging
 
 from aiogram import Bot, Dispatcher
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 import config
 from src.commands import router
-from src.utils import database
+from src.utils.middlewares.db import DbSessionMiddleware
 
 dp = Dispatcher()
 bot = Bot(token=config.BOT_TOKEN, parse_mode='HTML')
 
 
 async def main() -> None:
-    await database.initDb()  # создание бд если это надо
-    dp.include_routers(router.restrictions_commands,
-                       router.utility_commands,
-                       router.fun_commands,
-                       router.configuration_commands,
-                       router.events_commands)
+    engine = create_async_engine(url=config.DB_URL)
+    sessionmaker = async_sessionmaker(engine, expire_on_commit=False)
+
+    dp.update.middleware(DbSessionMiddleware(session_pool=sessionmaker))
+
+    dp.include_routers(
+        router.restrictions_commands,
+        router.utility_commands,
+        router.fun_commands,
+        router.configuration_commands,
+        router.events_commands
+    )
     await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
 
 
