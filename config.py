@@ -1,6 +1,7 @@
 from os import getenv
 
 BOT_TOKEN = getenv('TOKEN')
+ADMIN_ID = int(getenv('ADMIN_ID', 0))
 
 DB_FILE = 'tribunalbot.db'
 DB_URL = 'sqlite+aiosqlite:///tribunalbot.db'
