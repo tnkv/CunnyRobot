@@ -1,6 +1,7 @@
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.utils import database, utils
 from src.utils.ChatInfo import ChatInfo
@@ -9,10 +10,11 @@ from src.utils.filters import admin_filter, reply_filter
 router = Router()
 
 
-@router.message(Command(commands=['give_immune', 'give_immunity']), admin_filter.AdminFilter(),
+@router.message(Command(commands=['give_immune', 'give_immunity']),
+                admin_filter.AdminFilter(),
                 reply_filter.NeedReplyFilter())
-async def command_give_immune(message: Message) -> None:
-    chat_info = ChatInfo(database.getChatInfo(message.chat.id))
+async def command_give_immune(message: Message, session: AsyncSession) -> None:
+    chat_info = ChatInfo(await database.get_chat_info(session, message.chat.id))
     name = utils.name_format(message.reply_to_message.from_user.id,
                              message.reply_to_message.from_user.username,
                              message.reply_to_message.from_user.first_name,
@@ -24,17 +26,18 @@ async def command_give_immune(message: Message) -> None:
                             'Забрать иммунитет можно через /revoke_immune')
         return
 
-    database.setChatInfo(chat_info.export())
+    await database.set_chat_info(session, chat_info.export())
     await message.reply(f'Пользователю {name} был выдан иммунитет от трибунала.\n\n'
                         'Проверить наличие можно через /check\n'
                         'Забрать иммунитет можно через /revoke_immune')
 
 
 # Отмена иммунитета
-@router.message(Command(commands=['revoke_immune', 'revoke_immunity']), admin_filter.AdminFilter(),
+@router.message(Command(commands=['revoke_immune', 'revoke_immunity']),
+                admin_filter.AdminFilter(),
                 reply_filter.NeedReplyFilter())
-async def command_revoke_immune(message: Message) -> None:
-    chat_info = ChatInfo(database.getChatInfo(message.chat.id))
+async def command_revoke_immune(message: Message, session: AsyncSession) -> None:
+    chat_info = ChatInfo(await database.get_chat_info(session, message.chat.id))
     name = utils.name_format(message.reply_to_message.from_user.id,
                              message.reply_to_message.from_user.username,
                              message.reply_to_message.from_user.first_name,
@@ -46,7 +49,7 @@ async def command_revoke_immune(message: Message) -> None:
                             'Выдать иммунитет можно через /give_immune')
         return
 
-    database.setChatInfo(chat_info.export())
+    await database.set_chat_info(session, chat_info.export())
     await message.reply(f'У пользователя {name} был отобран иммунитет от трибунала.\n\n'
                         'Проверить наличие можно через /check\n'
                         'Выдать иммунитет можно через /give_immune')
@@ -54,9 +57,9 @@ async def command_revoke_immune(message: Message) -> None:
 
 # Проверка наличия иммунитета
 @router.message(Command(commands=['check']))
-async def command_check(message: Message) -> None:
+async def command_check(message: Message, session: AsyncSession) -> None:
     is_initiator_admin = await utils.is_admin(message.from_user.id, message)
-    chat_info = ChatInfo(database.getChatInfo(message.chat.id))
+    chat_info = ChatInfo(await database.get_chat_info(session, message.chat.id))
 
     if not message.reply_to_message:
         await message.reply(

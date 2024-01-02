@@ -5,6 +5,7 @@ from aiogram import Router, F
 from aiogram.enums import ChatMemberStatus
 from aiogram.filters import Command
 from aiogram.types import Message, ChatPermissions, CallbackQuery
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.utils import keyboards, database, utils
 from src.utils.ChatInfo import ChatInfo
@@ -15,7 +16,7 @@ router = Router()
 
 # Трибунал
 @router.message(Command('tribunal'))
-async def command_tribunal(message: Message) -> None:
+async def command_tribunal(message: Message, session: AsyncSession) -> None:
     if not message.reply_to_message:  # Проверка что ответ на сообщение
         await message.reply(
             'Команду /tribunal надо писать в ответ на сообщение человека, за ссылку в гулаг которого вы хотите начать голосование')
@@ -25,7 +26,7 @@ async def command_tribunal(message: Message) -> None:
         await message.reply('Нельзя начать трибунал против себя.')
         return
 
-    chat_info = ChatInfo(database.getChatInfo(message.chat.id))
+    chat_info = ChatInfo(await database.get_chat_info(session, message.chat.id))
     target_id = message.reply_to_message.from_user.id
     target = await message.chat.get_member(user_id=target_id)
     name = utils.name_format(message.reply_to_message.from_user.id,
@@ -42,15 +43,21 @@ async def command_tribunal(message: Message) -> None:
         await message.reply('Невозможно начать трибунал, пользователь уже ограничен.')
         return
 
-    tribunalTimeout = chat_info.last_tribunal_end
-    if tribunalTimeout >= time():  # Проверка что таймаут прошел
-        await message.reply(f'Перед началом нового трибунала, подождите {tribunalTimeout - int(time())} секунд.')
+    tribunal_timeout = chat_info.last_tribunal_end
+    current_time = int(time())
+
+    if tribunal_timeout >= current_time:  # Проверка что таймаут прошел
+        if tribunal_timeout - 90 >= current_time:
+            await message.reply(
+                f'В чате есть активный трибунал, перед началом нового подождите {tribunal_timeout - current_time} секунд.')
+            return
+        await message.reply(f'Перед началом нового трибунала, подождите {tribunal_timeout - current_time} секунд.')
         return
 
-    endTime = int(time()) + 90
+    end_time = current_time + 90
 
-    chat_info.set_tribunal_timeout(int(endTime) + 90)
-    database.setChatInfo(chat_info.export())
+    chat_info.set_tribunal_timeout(end_time + 90)
+    await database.set_chat_info(session, chat_info.export())
 
     msg = await message.bot.send_poll(chat_id=message.chat.id,
                                       reply_to_message_id=message.reply_to_message.message_id,
@@ -61,14 +68,13 @@ async def command_tribunal(message: Message) -> None:
                                                                                 False)})''',
                                       options=['За', 'Против'],
                                       is_anonymous=False,
-                                      reply_markup=keyboards.cancel_tribunal_keyboard(endTime - int(time())))
-    while time() < endTime:
-        await asyncio.sleep(min(5.0, endTime - time()))
-        if ChatInfo(database.getChatInfo(
-                message.chat.id)).last_tribunal_end < time():  # Проверка что трибунал не был отменён администратором
-            return
+                                      reply_markup=keyboards.cancel_tribunal_keyboard(end_time - int(time())))
+    while time() < end_time:
+        await asyncio.sleep(min(5.0, end_time - time()))
+        if (ChatInfo(await database.get_chat_info(session, message.chat.id))
+                .last_tribunal_end < time()): return  # Проверка что трибунал не был отменён администратором
 
-        await msg.edit_reply_markup(reply_markup=keyboards.cancel_tribunal_keyboard(endTime - int(time())))
+        await msg.edit_reply_markup(reply_markup=keyboards.cancel_tribunal_keyboard(end_time - int(time())))
 
     poll = await message.bot.stop_poll(chat_id=message.chat.id,
                                        message_id=msg.message_id,
@@ -106,10 +112,10 @@ async def command_tribunal(message: Message) -> None:
 
 # Обработка отмены трибунала
 @router.callback_query(F.data == 'cancel_tribunal', admin_filter.CallbackAdminFilter(False))
-async def callback_cancel_tribunal(callback: CallbackQuery) -> None:
-    chat_info = ChatInfo(database.getChatInfo(callback.message.chat.id))
+async def callback_cancel_tribunal(callback: CallbackQuery, session: AsyncSession) -> None:
+    chat_info = ChatInfo(await database.get_chat_info(session, callback.message.chat.id))
     chat_info.set_tribunal_timeout(int(time()))
-    database.setChatInfo(chat_info.export())
+    await database.set_chat_info(session, chat_info.export())
     try:
         name = utils.name_format(callback.from_user.id,
                                  callback.from_user.username,

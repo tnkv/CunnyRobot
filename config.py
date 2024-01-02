@@ -1,6 +1,10 @@
 from os import getenv
 
 BOT_TOKEN = getenv('TOKEN')
+ADMIN_ID = int(getenv('ADMIN_ID', 0))
+
+DB_FILE = 'tribunalbot.db'
+DB_URL = 'sqlite+aiosqlite:///tribunalbot.db'
 
 DEFAULT_CHAT_SETTINGS = {
     'welcome_message': True,
@@ -11,3 +15,4 @@ DEFAULT_CHAT_SETTINGS = {
     'filters_enabled': False,
     'filters_list': {}
 }
+

@@ -4,6 +4,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.utils import database, keyboards, utils
 from src.utils.ChatInfo import ChatInfo
@@ -22,8 +23,8 @@ class SetWelcomeTime(StatesGroup):
 
 
 @router.callback_query(F.data == 'settings_enter_btn', admin_filter.CallbackAdminFilter())
-async def callback_enter(callback: CallbackQuery) -> None:
-    chat_info = ChatInfo(database.getChatInfo(callback.message.chat.id))
+async def callback_enter(callback: CallbackQuery, session: AsyncSession) -> None:
+    chat_info = ChatInfo(await database.get_chat_info(session, callback.message.chat.id))
     name = utils.name_format(callback.from_user.id,
                              callback.from_user.username,
                              callback.from_user.first_name,
@@ -38,10 +39,10 @@ async def callback_enter(callback: CallbackQuery) -> None:
 
 
 @router.callback_query(F.data == 'enter_welcome_btn', admin_filter.CallbackAdminFilter())
-async def callback_enter_welcome(callback: CallbackQuery) -> None:
-    chat_info = ChatInfo(database.getChatInfo(callback.message.chat.id))
+async def callback_enter_welcome(callback: CallbackQuery, session: AsyncSession) -> None:
+    chat_info = ChatInfo(await database.get_chat_info(session, callback.message.chat.id))
     chat_info.switch_welcome()
-    database.setChatInfo(chat_info.export())
+    await database.set_chat_info(session, chat_info.export())
     try:
         await callback.message.edit_reply_markup(callback.inline_message_id,
                                                  reply_markup=keyboards.configuration_welcome_keyboard(chat_info))
@@ -79,12 +80,12 @@ async def set_welcome_text(message: Message, state: FSMContext):
 
 
 @router.callback_query(SetWelcomeText.confirm_welcome_text, F.data == 'confirm')
-async def confirm_welcome_text(callback: CallbackQuery, state: FSMContext):
-    chat_info = ChatInfo(database.getChatInfo(callback.message.chat.id))
+async def confirm_welcome_text(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
+    chat_info = ChatInfo(await database.get_chat_info(session, callback.message.chat.id))
     fsm_data = await state.get_data()
     await callback.message.edit_text('Новое приветствие установлено.')
     chat_info.set_welcome_text(fsm_data.get('new_text', chat_info.welcome_message_text))
-    database.setChatInfo(chat_info.export())
+    await database.set_chat_info(session, chat_info.export())
     await state.clear()
 
 
@@ -109,7 +110,7 @@ async def cancel_fsm(message: Message, state: FSMContext):
 
 
 @router.message(SetWelcomeTime.wait_for_time)
-async def set_welcome_time(message: Message, state: FSMContext):
+async def set_welcome_time(message: Message, session: AsyncSession, state: FSMContext):
     if not message.text.isdigit():
         await message.reply('Это не похоже на целое число, попробуй ещё раз.')
         return
@@ -119,9 +120,9 @@ async def set_welcome_time(message: Message, state: FSMContext):
         await message.reply('Количество секунд должно удовлетворять условие "0 <= time <= 300"')
         return
 
-    chat_info = ChatInfo(database.getChatInfo(message.chat.id))
+    chat_info = ChatInfo(await database.get_chat_info(session, message.chat.id))
     chat_info.set_welcome_timeout(seconds)
-    database.setChatInfo(chat_info.export())
+    await database.set_chat_info(session, chat_info.export())
 
     await state.clear()
     await message.reply(

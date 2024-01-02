@@ -3,6 +3,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.utils import database, keyboards
 from src.utils.ChatInfo import ChatInfo
@@ -38,8 +39,8 @@ async def cancel_fsm(callback: CallbackQuery, state: FSMContext):
 
 
 @router.message(RemoveFilter.removable_id)
-async def filterremove_waitid(message: Message, state: FSMContext):
-    chat_info = ChatInfo(database.getChatInfo(message.chat.id))
+async def filterremove_waitid(message: Message, session: AsyncSession, state: FSMContext):
+    chat_info = ChatInfo(await database.get_chat_info(session, message.chat.id))
     selected_filter = chat_info.filters_list.get(message.text)
     if selected_filter is None:
         await message.reply(f'Фильтр с ID <code>{message.text}</code> не найден, проверьте написание.')
@@ -56,10 +57,10 @@ async def filterremove_waitid(message: Message, state: FSMContext):
 
 
 @router.callback_query(RemoveFilter.confirm_removing, F.data == 'confirm')
-async def cancel_fsm(callback: CallbackQuery, state: FSMContext):
-    chat_info = ChatInfo(database.getChatInfo(callback.message.chat.id))
+async def cancel_fsm(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
+    chat_info = ChatInfo(await database.get_chat_info(session, callback.message.chat.id))
     data = await state.get_data()
     chat_info.remove_filter(data.get('filter_id'))
     await callback.message.edit_text('<b>Фильтр удалён</b>\n')
     await state.clear()
-    database.setChatInfo(chat_info.export())
+    await database.set_chat_info(session, chat_info.export())
