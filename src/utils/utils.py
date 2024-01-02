@@ -3,6 +3,7 @@ from aiogram.utils.markdown import html_decoration
 from aiogram.enums import ChatMemberStatus
 from aiogram.types import Message
 
+ANON_ADMIN_ID = 1087968824
 CAS_LINK = 'https://api.cas.chat/check?user_id={user_id}'
 ADMIN_STATUS = (ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR)
 
@@ -27,7 +28,7 @@ async def is_cas_ban(TelegramUserID: int) -> bool:
 
 
 async def is_admin(user_id: int, message: Message) -> bool:
-    if message.sender_chat and message.sender_chat.id == message.chat.id:
+    if user_id == ANON_ADMIN_ID:
         return True
 
     if (await message.chat.get_member(user_id=user_id)).status in ADMIN_STATUS:
