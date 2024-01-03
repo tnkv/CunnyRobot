@@ -4,15 +4,14 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message, ChatPermissions
 
-from src.utils import utils
-from src.utils.filters import admin_filter, reply_filter
+from src.utils import utils, filters
 
 router = Router()
 
 TIME_COEFFICIENT = {'m': 60, 'h': 3600, 'd': 86400, 'w': 604800}
 
 
-@router.message(Command(commands=['mute', 'm']), admin_filter.AdminFilter(), reply_filter.NeedReplyFilter())
+@router.message(Command(commands=['mute', 'm']), filters.AdminFilter(), filters.NeedReplyFilter())
 async def command_mute(message: Message) -> Message | None:
     if await utils.is_admin(message.reply_to_message.from_user.id, message):
         return await message.reply('Этого пользователя замутить нельзя.')

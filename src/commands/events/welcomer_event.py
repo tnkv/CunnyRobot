@@ -6,9 +6,7 @@ from aiogram.filters import ChatMemberUpdatedFilter, IS_NOT_MEMBER, ADMINISTRATO
 from aiogram.types import ChatMemberUpdated, ChatPermissions, CallbackQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.utils import keyboards, database, utils
-from src.utils.ChatInfo import ChatInfo
-from src.utils.callback_factory import CaptchaCallbackFactory
+from src.utils import keyboards, database, utils, ChatInfo, CaptchaCallbackFactory
 
 router = Router()
 
@@ -17,7 +15,6 @@ router = Router()
 @router.my_chat_member(ChatMemberUpdatedFilter(member_status_changed=IS_NOT_MEMBER >> (MEMBER | ADMINISTRATOR)))
 async def event_new_chat(event: ChatMemberUpdated, session: AsyncSession) -> None:
     await database.add_chat(session, event.chat.id)
-
 
 # Приветствие нового участника
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=JOIN_TRANSITION))

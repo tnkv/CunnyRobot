@@ -5,8 +5,7 @@ from aiogram.filters import BaseFilter
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.utils import database, utils
-from src.utils.ChatInfo import ChatInfo
+from src.utils import database, utils, ChatInfo
 
 router = Router()
 

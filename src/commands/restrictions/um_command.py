@@ -2,12 +2,12 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message, ChatPermissions
 
-from src.utils.filters import admin_filter
+from src.utils import filters
 
 router = Router()
 
 
-@router.message(Command(commands=['unmute', 'um', 'unban']), admin_filter.AdminFilter())
+@router.message(Command(commands=['unmute', 'um', 'unban']), filters.AdminFilter())
 async def command_um(message: Message) -> None:
     if message.reply_to_message:
         if message.from_user.id == 136817688 and message.reply_to_message.sender_chat:

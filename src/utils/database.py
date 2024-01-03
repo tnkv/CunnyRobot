@@ -1,7 +1,7 @@
 from sqlalchemy import select, Result, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.utils.db import TribunalBot
+from src.utils.db import TribunalBot, Warns
 
 
 async def add_chat(session: AsyncSession, telegram_chat_id: int) -> TribunalBot:
@@ -33,3 +33,7 @@ async def chat_count(session: AsyncSession) -> int:
     request = select(func.count()).select_from(TribunalBot)
     result = await session.execute(request)
     return result.scalar()
+
+async def add_warn(session: AsyncSession, warn: Warns) -> None:
+    session.add(warn)
+    await session.commit()

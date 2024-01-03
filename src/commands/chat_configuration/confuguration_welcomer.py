@@ -6,9 +6,7 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.utils import database, keyboards, utils
-from src.utils.ChatInfo import ChatInfo
-from src.utils.filters import admin_filter
+from src.utils import database, keyboards, utils, ChatInfo, filters
 
 router = Router()
 
@@ -22,7 +20,7 @@ class SetWelcomeTime(StatesGroup):
     wait_for_time = State()
 
 
-@router.callback_query(F.data == 'settings_enter_btn', admin_filter.CallbackAdminFilter())
+@router.callback_query(F.data == 'settings_enter_btn', filters.CallbackAdminFilter())
 async def callback_enter(callback: CallbackQuery, session: AsyncSession) -> None:
     chat_info = ChatInfo(await database.get_chat_info(session, callback.message.chat.id))
     name = utils.name_format(callback.from_user.id,
@@ -38,7 +36,7 @@ async def callback_enter(callback: CallbackQuery, session: AsyncSession) -> None
         pass
 
 
-@router.callback_query(F.data == 'enter_welcome_btn', admin_filter.CallbackAdminFilter())
+@router.callback_query(F.data == 'enter_welcome_btn', filters.CallbackAdminFilter())
 async def callback_enter_welcome(callback: CallbackQuery, session: AsyncSession) -> None:
     chat_info = ChatInfo(await database.get_chat_info(session, callback.message.chat.id))
     chat_info.switch_welcome()
@@ -50,7 +48,7 @@ async def callback_enter_welcome(callback: CallbackQuery, session: AsyncSession)
         pass
 
 
-@router.callback_query(F.data == 'enter_editmsg_btn', admin_filter.CallbackAdminFilter())
+@router.callback_query(F.data == 'enter_editmsg_btn', filters.CallbackAdminFilter())
 async def edit_welcome_msg(callback: CallbackQuery, state: FSMContext) -> None:
     await callback.message.answer('Для установки нового приветствия напишите его в следующем сообщении.\n\n'
                                   'Для упоминания пользователя добавь <code>{user}</code> в тексте.\n'
@@ -95,7 +93,7 @@ async def unconfirm_welcome_text(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_text('Новое приветствие не будет установлено.')
 
 
-@router.callback_query(F.data == 'enter_time_btn', admin_filter.CallbackAdminFilter())
+@router.callback_query(F.data == 'enter_time_btn', filters.CallbackAdminFilter())
 async def callback_welcome_time(callback: CallbackQuery, state: FSMContext) -> None:
     await callback.message.answer(
         'Напиши количество секунд (0-300), которое потребуется подождать новому участнику, перед тем как получить возможность снять мут.\n\n'

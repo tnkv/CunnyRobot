@@ -5,9 +5,7 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.utils import database, keyboards
-from src.utils.ChatInfo import ChatInfo
-from src.utils.filters import admin_filter
+from src.utils import database, keyboards, ChatInfo, filters
 
 router = Router()
 
@@ -17,7 +15,7 @@ class RemoveFilter(StatesGroup):
     confirm_removing = State()
 
 
-@router.callback_query(F.data == 'filters_remove_btn', admin_filter.CallbackAdminFilter())
+@router.callback_query(F.data == 'filters_remove_btn', filters.CallbackAdminFilter())
 async def callback_filters_remove(callback: CallbackQuery, state: FSMContext) -> None:
     await callback.message.answer('Для удаления фильтра, напишите его ID\n\n'
                                   'Следующее введённое вами сообщение будет воспринято как ID фильтра, для выхода из режима удаления фильтра используй команду /cancel')

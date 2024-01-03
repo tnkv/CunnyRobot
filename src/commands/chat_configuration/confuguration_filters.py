@@ -4,16 +4,14 @@ from aiogram.types import CallbackQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.commands.chat_configuration.filers_modify import add_filter, remove_filter
-from src.utils import database, keyboards
-from src.utils.ChatInfo import ChatInfo
-from src.utils.filters import admin_filter
+from src.utils import database, keyboards, ChatInfo, filters
 
 router = Router()
 router.include_routers(add_filter.router,
                        remove_filter.router)
 
 
-@router.callback_query(F.data == 'filters_list_btn', admin_filter.CallbackAdminFilter())
+@router.callback_query(F.data == 'filters_list_btn', filters.CallbackAdminFilter())
 async def callback_filters_list(callback: CallbackQuery, session: AsyncSession) -> None:
     chat_info = ChatInfo(await database.get_chat_info(session, callback.message.chat.id))
     message = ('<b>Конфигурация чата</b>\n'
@@ -29,7 +27,7 @@ async def callback_filters_list(callback: CallbackQuery, session: AsyncSession) 
     await callback.answer()
 
 
-@router.callback_query(F.data == 'filters_switch_btn', admin_filter.CallbackAdminFilter())
+@router.callback_query(F.data == 'filters_switch_btn', filters.CallbackAdminFilter())
 async def callback_enter_welcome(callback: CallbackQuery, session: AsyncSession) -> None:
     chat_info = ChatInfo(await database.get_chat_info(session, callback.message.chat.id))
     chat_info.switch_filters()

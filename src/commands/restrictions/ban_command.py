@@ -2,13 +2,12 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
-from src.utils import utils
-from src.utils.filters import admin_filter
+from src.utils import utils, filters
 
 router = Router()
 
 
-@router.message(Command('ban'), admin_filter.AdminFilter())
+@router.message(Command('ban'), filters.AdminFilter())
 async def command_ban(message: Message) -> Message | None:
     if message.reply_to_message:
         if await utils.is_admin(message.reply_to_message.from_user.id, message):
