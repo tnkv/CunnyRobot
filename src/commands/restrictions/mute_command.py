@@ -17,19 +17,24 @@ async def command_mute(message: Message) -> Message | None:
         return await message.reply('Этого пользователя замутить нельзя.')
 
     msg = message.text.split(' ')
+    target_name = utils.name_format(
+        message.reply_to_message.from_user.id,
+        message.reply_to_message.from_user.username,
+        message.reply_to_message.from_user.first_name,
+        message.reply_to_message.from_user.last_name
+    )
 
     if len(msg) < 2:
-        await message.chat.restrict(user_id=message.reply_to_message.from_user.id,
-                                    until_date=0,
-                                    permissions=ChatPermissions(can_send_messages=False))
-        return
+        await message.chat.restrict(
+            user_id=message.reply_to_message.from_user.id,
+            until_date=0,
+            permissions=ChatPermissions(can_send_messages=False))
+        return await message.answer(f'Пользователь {target_name} замучен.')
 
-    await message.chat.restrict(user_id=message.reply_to_message.from_user.id,
-                                until_date=get_restriction_time(msg[1]),
-                                permissions=ChatPermissions(can_send_messages=False))
+    await message.chat.restrict(
+        user_id=message.reply_to_message.from_user.id,
+        until_date=utils.get_restriction_time(msg[1]),
+        permissions=ChatPermissions(can_send_messages=False)
+    )
 
-
-def get_restriction_time(duration: str) -> int:
-    unit = duration[-1]
-    value = int(duration[:-1]) if duration[:-1].isdigit() else 0
-    return int(time()) + value * TIME_COEFFICIENT.get(unit, 0) + 1
+    await message.answer(f'Пользователь {target_name} замучен на {msg[1]}.')

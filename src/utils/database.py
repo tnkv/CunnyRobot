@@ -1,6 +1,4 @@
-from typing import Any, Sequence
-
-from sqlalchemy import select, Result, func, Row, RowMapping, update
+from sqlalchemy import select, Result, func, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.utils.db import TribunalBot, Warns

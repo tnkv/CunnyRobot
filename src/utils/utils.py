@@ -52,3 +52,9 @@ def inflect_with_num(number: int, forms: tuple[str, str, str]) -> str:
         needed_form = 0
 
     return f'{number} {forms[needed_form]}'
+
+
+def get_restriction_time(duration: str) -> int:
+    unit = duration[-1]
+    value = int(duration[:-1]) if duration[:-1].isdigit() else 0
+    return int(time()) + value * TIME_COEFFICIENT.get(unit, 0) + 1

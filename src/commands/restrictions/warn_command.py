@@ -64,7 +64,7 @@ async def command_warn(message: Message, command: CommandObject, session: AsyncS
                    f'{check_warns.display_warns(all_warns)}')
             return await message.answer(msg)
         except aiogram.exceptions.TelegramBadRequest as e:
-            return await message.answer(f'Не получилось замутить пользователя, ошибка: \n{e}')
+            return await message.answer(f'Не получилось замутить пользователя.\n\nОшибка: <code>{e}</code>')
 
     msg = (f'Администратор {admin_name} выдал предупреждение {target_name}\n\n'
            f'Теперь пользователь имеет {warn_count}/{chat_info.warns_count_trigger} предупреждений.\n'

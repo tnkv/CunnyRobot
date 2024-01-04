@@ -16,6 +16,7 @@ router = Router()
 async def event_new_chat(event: ChatMemberUpdated, session: AsyncSession) -> None:
     await database.add_chat(session, event.chat.id)
 
+
 # Приветствие нового участника
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=JOIN_TRANSITION))
 async def event_new_member(event: ChatMemberUpdated, session: AsyncSession) -> None:
@@ -51,31 +52,42 @@ async def event_new_member(event: ChatMemberUpdated, session: AsyncSession) -> N
         return
 
     member = await event.chat.get_member(user_id=event.from_user.id)
-    name = utils.name_format(event.from_user.id,
-                             event.from_user.username,
-                             event.from_user.first_name,
-                             event.from_user.last_name)
+    name = utils.name_format(
+        event.from_user.id,
+        event.from_user.username,
+        event.from_user.first_name,
+        event.from_user.last_name
+    )
 
     if member.status in (ChatMemberStatus.RESTRICTED,) and not member.can_send_messages:
-        await event.bot.send_message(event.chat.id,
-                                     f'Привет {name}, если тебя не замутил админ, то ты пропустил сообщение с кнопкой при первом входе, найди его с помощью \"<code>@</code>\" в поиске.')
+        await event.bot.send_message(
+            event.chat.id,
+            f'Привет {name}, если тебя не замутил админ, то ты пропустил сообщение с кнопкой при первом входе, найди его с помощью \"<code>@</code>\" в поиске.'
+        )
 
     try:
-        await event.chat.restrict(user_id=event.from_user.id,
-                                  until_date=0,
-                                  permissions=ChatPermissions(can_send_messages=False))
+        await event.chat.restrict(
+            user_id=event.from_user.id,
+            until_date=0,
+            permissions=ChatPermissions(can_send_messages=False)
+        )
         welcome_message_text = chat_info.welcome_message_text.format(
             user=name) if '{user}' in chat_info.welcome_message_text else chat_info.welcome_message_text
 
-        await event.bot.send_message(event.chat.id,
-                                     welcome_message_text,
-                                     reply_markup=keyboards.captcha_keyboard(
-                                         int(time()) + chat_info.welcome_message_timeout,
-                                         event.from_user.id,
-                                         event.chat.id),
-                                     disable_web_page_preview=True)
-    except Exception:
-        return
+        await event.bot.send_message(
+            chat_id=event.chat.id,
+            text=welcome_message_text,
+            reply_markup=keyboards.captcha_keyboard(
+                int(time()) + chat_info.welcome_message_timeout,
+                event.from_user.id,
+                event.chat.id),
+            disable_web_page_preview=True
+        )
+    except Exception as e:
+        await event.bot.send_message(
+            chat_id=event.chat.id,
+            text=f'Не получилось замутить пользователя.\n\nОшибка: <code>{e}</code>'
+        )
 
 
 # Обработка кнопки в капче
@@ -118,5 +130,8 @@ async def callback_captcha(callback: CallbackQuery, callback_data: CaptchaCallba
             )
         )
         await callback.message.edit_reply_markup()
-    except Exception:
-        return
+    except Exception as e:
+        await callback.bot.send_message(
+            chat_id=callback.message.chat.id,
+            text=f'Не получилось размутить пользователя.\n\nОшибка: <code>{e}</code>'
+        )
