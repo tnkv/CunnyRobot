@@ -9,15 +9,14 @@ from aiogram.filters import Command
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.utils import database
-from src.utils.filters import admin_filter
+from src.utils import database, filters
 
 router = Router()
 
 startup_time = datetime.now()
 
 
-@router.message(Command(commands=['status']), admin_filter.SuperUserFilter())
+@router.message(Command(commands=['status']), filters.SuperUserFilter())
 async def command_status(message: Message, session: AsyncSession) -> None:
     await message.reply(
         text=f'<b>TribunalBot</b> (<code>{get_commit()}</code>)\n\n'

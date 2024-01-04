@@ -1,7 +1,8 @@
 from .base import Base
-from .models import TribunalBot
+from .models import TribunalBot, Warns
 
 __all__ = [
     "Base",
-    "TribunalBot"
+    "TribunalBot",
+    "Warns"
 ]

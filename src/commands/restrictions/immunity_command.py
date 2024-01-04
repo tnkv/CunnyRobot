@@ -3,16 +3,12 @@ from aiogram.filters import Command
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.utils import database, utils
-from src.utils.ChatInfo import ChatInfo
-from src.utils.filters import admin_filter, reply_filter
+from src.utils import database, utils, ChatInfo, filters
 
 router = Router()
 
 
-@router.message(Command(commands=['give_immune', 'give_immunity']),
-                admin_filter.AdminFilter(),
-                reply_filter.NeedReplyFilter())
+@router.message(Command(commands=['give_immune', 'give_immunity']), filters.AdminFilter(), filters.NeedReplyFilter())
 async def command_give_immune(message: Message, session: AsyncSession) -> None:
     chat_info = ChatInfo(await database.get_chat_info(session, message.chat.id))
     name = utils.name_format(message.reply_to_message.from_user.id,
@@ -33,9 +29,7 @@ async def command_give_immune(message: Message, session: AsyncSession) -> None:
 
 
 # Отмена иммунитета
-@router.message(Command(commands=['revoke_immune', 'revoke_immunity']),
-                admin_filter.AdminFilter(),
-                reply_filter.NeedReplyFilter())
+@router.message(Command(commands=['revoke_immune', 'revoke_immunity']), filters.AdminFilter(), filters.NeedReplyFilter())
 async def command_revoke_immune(message: Message, session: AsyncSession) -> None:
     chat_info = ChatInfo(await database.get_chat_info(session, message.chat.id))
     name = utils.name_format(message.reply_to_message.from_user.id,

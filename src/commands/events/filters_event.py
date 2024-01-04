@@ -5,8 +5,7 @@ from aiogram.filters import BaseFilter
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.utils import database, utils
-from src.utils.ChatInfo import ChatInfo
+from src.utils import database, utils, ChatInfo
 
 router = Router()
 
@@ -64,13 +63,13 @@ class CustomFilters(BaseFilter):
 async def comments_mode(message: Message) -> None:
     try:
         await message.delete()
-    except Exception:
-        pass
+    except Exception as e:
+        await message.answer(f'Не удалось удалить сообщение.\n\nОшибка: <code>{e}</code>')
 
 
 @router.message(CustomFilters())
 async def comments_mode(message: Message) -> None:
     try:
         await message.delete()
-    except Exception:
-        pass
+    except Exception as e:
+        await message.answer(f'Не удалось удалить сообщение.\n\nОшибка: <code>{e}</code>')

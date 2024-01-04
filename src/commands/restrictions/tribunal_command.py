@@ -7,9 +7,7 @@ from aiogram.filters import Command
 from aiogram.types import Message, ChatPermissions, CallbackQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.utils import keyboards, database, utils
-from src.utils.ChatInfo import ChatInfo
-from src.utils.filters import admin_filter
+from src.utils import keyboards, database, utils, ChatInfo, filters
 
 router = Router()
 
@@ -72,8 +70,8 @@ async def command_tribunal(message: Message, session: AsyncSession) -> None:
     while time() < end_time:
         timer += 5
         await asyncio.sleep(min(timer - time(), end_time - time()))
-        if (ChatInfo(await database.get_chat_info(session, message.chat.id))
-                .last_tribunal_end < time()): return  # Проверка что трибунал не был отменён администратором
+        if ChatInfo(await database.get_chat_info(session, message.chat.id)).last_tribunal_end < time():
+            return  # Проверка что трибунал не был отменён администратором
 
         await msg.edit_reply_markup(reply_markup=keyboards.cancel_tribunal_keyboard(end_time - int(time())))
 
@@ -107,12 +105,12 @@ async def command_tribunal(message: Message, session: AsyncSession) -> None:
                                                permissions=ChatPermissions(can_send_messages=False))
         await message.answer(
             f'Голосование за мут {name} закончилось с {muteVotes}% голосов за, пользователь отправляется в мут на {mute_period_inflected}.')
-    except Exception:
-        pass
+    except Exception as e:
+        await message.answer(f'Не получилось замутить пользователя.\n\nОшибка: <code>{e}</code>')
 
 
 # Обработка отмены трибунала
-@router.callback_query(F.data == 'cancel_tribunal', admin_filter.CallbackAdminFilter(False))
+@router.callback_query(F.data == 'cancel_tribunal', filters.CallbackAdminFilter(False))
 async def callback_cancel_tribunal(callback: CallbackQuery, session: AsyncSession) -> None:
     chat_info = ChatInfo(await database.get_chat_info(session, callback.message.chat.id))
     chat_info.set_tribunal_timeout(int(time()))
@@ -125,5 +123,5 @@ async def callback_cancel_tribunal(callback: CallbackQuery, session: AsyncSessio
                                  False)
         await callback.bot.stop_poll(chat_id=callback.message.chat.id, message_id=callback.message.message_id,
                                      reply_markup=keyboards.canceled_tribunal_keyboard(name))
-    except Exception:
-        return
+    except Exception as e:
+        await callback.answer(f'{e}')

@@ -8,9 +8,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.utils.markdown import html_decoration
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.utils import database, keyboards
-from src.utils.ChatInfo import ChatInfo
-from src.utils.filters import admin_filter
+from src.utils import database, keyboards, ChatInfo, filters
 
 router = Router()
 
@@ -21,7 +19,7 @@ class AddFilter(StatesGroup):
     filter_confirm = State()
 
 
-@router.callback_query(F.data == 'filters_add_btn', admin_filter.CallbackAdminFilter())
+@router.callback_query(F.data == 'filters_add_btn', filters.CallbackAdminFilter())
 async def callback_filters_add(callback: CallbackQuery, state: FSMContext) -> None:
     await callback.message.answer('Для добавления нового фильтра, напишите его regex\n\n'
                                   'Следующее введённое вами сообщение будет воспринято как фильтр, для выхода из режима добавления фильтра используй команду /cancel')

@@ -9,9 +9,9 @@ class CaptchaCallbackFactory(CallbackData, prefix="captcha"):
     user: int
     chat: int
 
-
-class FilterslistCallbackFactory(CallbackData, prefix="filter"):
+class DelwarnCallbackFactory(CallbackData, prefix="delwarn"):
     """
-    Обработка нажатия на кнопку в списке филтьтров
+    Обработка удаления конкретного варна, по айди
     """
-    filter_id: str
+    warn_id: int
+    user_id: int

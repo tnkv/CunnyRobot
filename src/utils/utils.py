@@ -1,3 +1,5 @@
+from time import time
+
 from aiogram.client.session import aiohttp
 from aiogram.utils.markdown import html_decoration
 from aiogram.enums import ChatMemberStatus
@@ -6,7 +8,7 @@ from aiogram.types import Message
 ANON_ADMIN_ID = 1087968824
 CAS_LINK = 'https://api.cas.chat/check?user_id={user_id}'
 ADMIN_STATUS = (ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR)
-
+TIME_COEFFICIENT = {'m': 60, 'h': 3600, 'd': 86400, 'w': 604800}
 
 def name_format(UserID: int, userName, firstName, surName,
                 isLink=True) -> str:  # Форматирование имени в зависимости от наличия юзернейма, фамилии итд
@@ -52,3 +54,9 @@ def inflect_with_num(number: int, forms: tuple[str, str, str]) -> str:
         needed_form = 0
 
     return f'{number} {forms[needed_form]}'
+
+
+def get_restriction_time(duration: str) -> int:
+    unit = duration[-1]
+    value = int(duration[:-1]) if duration[:-1].isdigit() else 0
+    return int(time()) + value * TIME_COEFFICIENT.get(unit, 0) + 1
