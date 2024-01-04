@@ -1,3 +1,5 @@
+from time import time
+
 from aiogram.client.session import aiohttp
 from aiogram.utils.markdown import html_decoration
 from aiogram.enums import ChatMemberStatus
@@ -6,7 +8,7 @@ from aiogram.types import Message
 ANON_ADMIN_ID = 1087968824
 CAS_LINK = 'https://api.cas.chat/check?user_id={user_id}'
 ADMIN_STATUS = (ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR)
-
+TIME_COEFFICIENT = {'m': 60, 'h': 3600, 'd': 86400, 'w': 604800}
 
 def name_format(UserID: int, userName, firstName, surName,
                 isLink=True) -> str:  # Форматирование имени в зависимости от наличия юзернейма, фамилии итд

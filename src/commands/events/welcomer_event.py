@@ -12,9 +12,22 @@ router = Router()
 
 
 # Добавляю чат в бд если добавили бота в него
-@router.my_chat_member(ChatMemberUpdatedFilter(member_status_changed=IS_NOT_MEMBER >> (MEMBER | ADMINISTRATOR)))
+@router.my_chat_member(ChatMemberUpdatedFilter(member_status_changed=IS_NOT_MEMBER >> MEMBER))
 async def event_new_chat(event: ChatMemberUpdated, session: AsyncSession) -> None:
     await database.add_chat(session, event.chat.id)
+    await event.bot.send_message(
+        event.chat.id,
+        f'Привет. Для того что бы я мог управлять этим чатом мне необходимы права администратора.'
+    )
+
+
+@router.my_chat_member(ChatMemberUpdatedFilter(member_status_changed=(IS_NOT_MEMBER | MEMBER) >> ADMINISTRATOR))
+async def event_new_chat(event: ChatMemberUpdated, session: AsyncSession) -> None:
+    await database.add_chat(session, event.chat.id)
+    await event.bot.send_message(
+        event.chat.id,
+        f'Бот добавлен в качестве админстратора этого чата.'
+    )
 
 
 # Приветствие нового участника

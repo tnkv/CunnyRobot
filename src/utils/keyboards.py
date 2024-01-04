@@ -115,3 +115,10 @@ def confirm_keyboard() -> InlineKeyboardMarkup:
     builder.button(text='Нет', callback_data='unconfirm')
 
     return builder.as_markup()
+
+
+def add_to_chat_keyboard(bot_username: str) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.button(text='Добавить в чат', url=f'https://t.me/{bot_username}?startgroup=start')
+
+    return builder.as_markup()

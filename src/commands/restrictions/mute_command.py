@@ -1,5 +1,3 @@
-from time import time
-
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message, ChatPermissions
@@ -7,8 +5,6 @@ from aiogram.types import Message, ChatPermissions
 from src.utils import utils, filters
 
 router = Router()
-
-TIME_COEFFICIENT = {'m': 60, 'h': 3600, 'd': 86400, 'w': 604800}
 
 
 @router.message(Command(commands=['mute', 'm']), filters.AdminFilter(), filters.NeedReplyFilter())
