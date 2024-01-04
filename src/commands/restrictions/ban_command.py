@@ -33,11 +33,10 @@ async def command_ban(message: Message) -> Message | bool | None:
         return await message.reply(
             'Для блокировки пользователя необходимо ответить на сообщение или написать Telegram ID через пробел.'
         )
-
-    if await utils.is_admin(int(msg[1]), message):
-        return await message.reply('Этого пользователя забанить нельзя.')
-
     try:
+        if await utils.is_admin(int(msg[1]), message):
+            return await message.reply('Этого пользователя забанить нельзя.')
+
         await message.chat.ban(
             user_id=int(msg[1]),
             until_date=utils.get_restriction_time(msg[1])
