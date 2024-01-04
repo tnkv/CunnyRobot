@@ -67,7 +67,7 @@ def configuration_main_keyboard(chat_info: ChatInfo) -> InlineKeyboardMarkup:
     builder.button(text=f'Режим комментариев: {"включён" if chat_info.is_comments else "выключен"}',
                    callback_data='comments_settings_btn')
     builder.button(text=f'Настройки входа', callback_data='settings_enter_btn')
-    builder.button(text=f'Пользователи', callback_data='settings_members_btn')
+    # TODO: builder.button(text=f'Пользователи', callback_data='settings_members_btn')
     builder.button(text=f'Фильтры', callback_data='settings_filters_btn')
     builder.adjust(1)
 

@@ -32,7 +32,7 @@ async def main() -> None:
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    logging.getLogger("aiogram.event").setLevel(logging.INFO)
+    logging.getLogger("aiogram.event").setLevel(logging.WARNING)
     try:
         asyncio.run(main())
     except (SystemExit, KeyboardInterrupt):

@@ -52,7 +52,6 @@ class ChatInfo:
         return TribunalBot(TelegramChatID=self.chat_id,
                            LastTribunalEnd=self.last_tribunal_end,
                            ChatSettings=json.dumps(settings))
-        # return self.chat_id, self.last_tribunal_end, json.dumps(settings)
 
     def switch_comments(self) -> None:
         self.is_comments = not self.is_comments
