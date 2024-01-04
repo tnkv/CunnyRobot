@@ -1,6 +1,9 @@
+from time import time
+
+import aiogram.exceptions
 from aiogram import Router
 from aiogram.filters import Command, CommandObject
-from aiogram.types import Message
+from aiogram.types import Message, ChatPermissions
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.commands.restrictions.warns import delwarn, check_warns
@@ -48,11 +51,20 @@ async def command_warn(message: Message, command: CommandObject, session: AsyncS
     warn_count = len(all_warns)
     if warn_count >= chat_info.warns_count_trigger:
         await database.deactivate_warns(session, warn)
-        msg = (f'Пользователь {target_name} получил {warn_count}/{chat_info.warns_count_trigger} предупреждений. '
-               'В качестве наказания был выдан мут на 1 неделю.\n\n'
-               f'{check_warns.display_warns(all_warns)}')
-
-        return await message.answer(msg)
+        try:
+            await message.chat.restrict(
+                user_id=message.reply_to_message.from_user.id,
+                until_date=int(time()) + 604_800 + 1,
+                permissions=ChatPermissions(
+                    can_send_messages=False
+                )
+            )
+            msg = (f'Пользователь {target_name} получил {warn_count}/{chat_info.warns_count_trigger} предупреждений. '
+                   'В качестве наказания был выдан мут на 1 неделю.\n\n'
+                   f'{check_warns.display_warns(all_warns)}')
+            return await message.answer(msg)
+        except aiogram.exceptions.TelegramBadRequest as e:
+            return await message.answer(f'Не получилось замутить пользователя, ошибка: \n{e}')
 
     msg = (f'Администратор {admin_name} выдал предупреждение {target_name}\n\n'
            f'Теперь пользователь имеет {warn_count}/{chat_info.warns_count_trigger} предупреждений.\n'

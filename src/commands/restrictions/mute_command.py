@@ -32,4 +32,4 @@ async def command_mute(message: Message) -> Message | None:
 def get_restriction_time(duration: str) -> int:
     unit = duration[-1]
     value = int(duration[:-1]) if duration[:-1].isdigit() else 0
-    return int(time()) + value * TIME_COEFFICIENT.get(unit, 0)
+    return int(time()) + value * TIME_COEFFICIENT.get(unit, 0) + 1
