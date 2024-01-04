@@ -3,12 +3,15 @@ from aiogram.filters import Command, CommandObject
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.commands.restrictions.warns import delwarn
+from src.commands.restrictions.warns import delwarn, check_warns
 from src.utils import filters, database, ChatInfo, utils, keyboards
-from src.utils.db import Warns, TribunalBot
+from src.utils.db import Warns
 
 router = Router()
-router.include_router(delwarn.router)
+router.include_routers(
+    delwarn.router,
+    check_warns.router
+)
 
 
 @router.message(Command(commands=['warn']), filters.AdminFilter(), filters.NeedReplyFilter())
@@ -39,7 +42,7 @@ async def command_warn(message: Message, command: CommandObject, session: AsyncS
         message.reply_to_message.from_user.id,
         message.reply_to_message.from_user.username,
         message.reply_to_message.from_user.first_name,
-        message.reply_to_message.from_user.last_name,
+        message.reply_to_message.from_user.last_name
     )
 
     warn_count = len(all_warns)
@@ -47,11 +50,7 @@ async def command_warn(message: Message, command: CommandObject, session: AsyncS
         await database.deactivate_warns(session, warn)
         msg = (f'Пользователь {target_name} получил {warn_count}/{chat_info.warns_count_trigger} предупреждений. '
                'В качестве наказания был выдан мут на 1 неделю.\n\n'
-               'Предупреждения полученные пользователем:\n')
-        counter = 1
-        for wrn in all_warns:
-            msg += f'<b>{counter})</b> <a href="https://t.me/c/{str(wrn.TelegramChatID)[4:]}/{wrn.MessageID}">{wrn.Reason if wrn.Reason else "Без причины."}</a>\n'
-            counter += 1
+               f'{check_warns.display_warns(all_warns)}')
 
         return await message.answer(msg)
 

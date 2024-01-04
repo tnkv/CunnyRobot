@@ -1,6 +1,6 @@
 from typing import Any, Sequence
 
-from sqlalchemy import select, Result, func, ScalarResult, Row, RowMapping, update
+from sqlalchemy import select, Result, func, Row, RowMapping, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.utils.db import TribunalBot, Warns
@@ -37,7 +37,7 @@ async def chat_count(session: AsyncSession) -> int:
     return result.scalar()
 
 
-async def add_warn(session: AsyncSession, warn: Warns) -> Sequence[Row[Any] | RowMapping | Any]:
+async def add_warn(session: AsyncSession, warn: Warns):
     session.add(warn)
     await session.commit()
 
@@ -62,7 +62,7 @@ async def deactivate_warns(session: AsyncSession, warn: Warns) -> None:
     await session.commit()
 
 
-async def get_one_warn(session: AsyncSession, telegram_chat_id, telegram_user_id: int):
+async def get_warns(session: AsyncSession, telegram_chat_id, telegram_user_id: int):
     request = select(Warns).filter_by(
         TelegramChatID=telegram_chat_id,
         TelegramUserID=telegram_user_id,

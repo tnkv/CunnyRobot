@@ -23,13 +23,14 @@ async def callback_delwarn(callback: CallbackQuery, callback_data: DelwarnCallba
     await database.set_chat_info(session, deleted_warn)
 
 
-@router.message(Command(commands=['delwarn', 'delwarns']), filters.AdminFilter(), filters.NeedReplyFilter())
+@router.message(Command(commands=['delwarn', 'delwarns', 'dewarn', 'dewarns']), filters.AdminFilter(), filters.NeedReplyFilter())
 async def command_delwarn(message: Message, session: AsyncSession):
-    warns = await database.get_one_warn(
+    warns = await database.get_warns(
         session,
         message.chat.id,
         message.reply_to_message.from_user.id
     )
+
     if not warns:
         return await message.reply('У пользоваетеля нет предупреждений.')
 
