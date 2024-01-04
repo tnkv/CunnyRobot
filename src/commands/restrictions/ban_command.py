@@ -22,7 +22,7 @@ async def command_ban(message: Message) -> Message | None:
 
     msg = message.text.split(' ')
     if len(msg) >= 2 and msg[1].isdigit():
-        if await utils.is_admin(message.reply_to_message.from_user.id, message):
+        if await utils.is_admin(int(msg[1]), message):
             return await message.reply('Этого пользователя забанить нельзя.')
 
         try:

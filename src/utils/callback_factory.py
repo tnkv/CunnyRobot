@@ -8,3 +8,10 @@ class CaptchaCallbackFactory(CallbackData, prefix="captcha"):
     date: int
     user: int
     chat: int
+
+class DelwarnCallbackFactory(CallbackData, prefix="delwarn"):
+    """
+    Обработка удаления конкретного варна, по айди
+    """
+    warn_id: int
+    user_id: int

@@ -16,6 +16,7 @@ class ChatInfo:
     is_comments = DEFAULT_CHAT_SETTINGS.get('is_comments', False)
     ban_channel = DEFAULT_CHAT_SETTINGS.get('ban_channel', False)
     channel_whitelist = DEFAULT_CHAT_SETTINGS.get('channel_whitelist', [])
+    warns_count_trigger = DEFAULT_CHAT_SETTINGS.get('warns_count_trigger', 3)
     filters_enabled = DEFAULT_CHAT_SETTINGS.get('filters_enabled', False)
     filters_list = DEFAULT_CHAT_SETTINGS.get('filters_list', {})
 
