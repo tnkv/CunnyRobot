@@ -65,7 +65,7 @@ async def comments_mode(message: Message, i18n: I18nContext) -> None:
     try:
         await message.delete()
     except Exception as e:
-        await message.answer(i18n.get("common-errors-cant_delete_msg", exception=e))
+        await message.answer(i18n.get("common-errors-cant_delete_msg", exception=str(e)))
 
 
 @router.message(CustomFilters())
@@ -73,4 +73,4 @@ async def comments_mode(message: Message, i18n: I18nContext) -> None:
     try:
         await message.delete()
     except Exception as e:
-        await message.answer(i18n.get("common-errors-cant_delete_msg", exception=e))
+        await message.answer(i18n.get("common-errors-cant_delete_msg", exception=str(e)))

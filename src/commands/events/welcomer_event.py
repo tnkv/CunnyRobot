@@ -99,7 +99,7 @@ async def event_new_member(event: ChatMemberUpdated, session: AsyncSession, i18n
     except Exception as e:
         await event.bot.send_message(
             chat_id=event.chat.id,
-            text=i18n.get('common-errors-cant_mute', exception=e)
+            text=i18n.get('common-errors-cant_mute', exception=str(e))
         )
 
 
@@ -146,5 +146,5 @@ async def callback_captcha(callback: CallbackQuery, callback_data: CaptchaCallba
     except Exception as e:
         await callback.bot.send_message(
             chat_id=callback.message.chat.id,
-            text=i18n.get('common-errors-cant_unmute', exception=e)
+            text=i18n.get('common-errors-cant_unmute', exception=str(e))
         )

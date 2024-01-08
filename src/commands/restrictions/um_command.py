@@ -1,6 +1,7 @@
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message, ChatPermissions
+from aiogram_i18n import I18nContext
 
 from src.utils import filters
 
@@ -8,11 +9,10 @@ router = Router()
 
 
 @router.message(Command(commands=['unmute', 'um', 'unban']), filters.AdminFilter())
-async def command_um(message: Message) -> None:
+async def command_um(message: Message, i18n: I18nContext) -> bool | Message:
     if message.reply_to_message:
         if message.from_user.id == 136817688 and message.reply_to_message.sender_chat:
-            await message.chat.unban_sender_chat(message.reply_to_message.sender_chat.id)
-            return
+            return await message.chat.unban_sender_chat(message.reply_to_message.sender_chat.id)
 
         TelegramID = message.reply_to_message.from_user.id
     else:
@@ -20,9 +20,8 @@ async def command_um(message: Message) -> None:
         if len(msg) >= 2 and msg[1].isdigit():
             TelegramID = int(msg[1])
         else:
-            await message.reply(
-                'Для снятия ограничений необходимо ответить на сообщение или написать Telegram ID через пробел.')
-            return
+            return await message.reply(i18n.get('command-unmute-need_telegram_id'))
+
     try:
         await message.chat.restrict(
             user_id=TelegramID,
@@ -44,6 +43,7 @@ async def command_um(message: Message) -> None:
                 can_add_web_page_previews=True
             )
         )
+        await message.reply(i18n.get('command-unmute-unmute', user=TelegramID))
 
     except Exception as e:
-        await message.reply(f'Не удалось снять огранчиения.\n\nОшибка: {e}')
+        await message.reply(i18n.get('common-errors-cant_unmute', exception=str(e)))
