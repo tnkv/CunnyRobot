@@ -11,8 +11,6 @@ router = Router()
 @router.message(CommandStart())
 async def command_start(message: Message, i18n: I18nContext) -> Message:
     if message.chat.id == message.from_user.id:
-        type(i18n.messages.start)
-        print(i18n.messages.start)
-        return await message.answer(text=i18n.get("messages-start"),
+        return await message.answer(text=i18n.get("command-start"),
                                     reply_markup=keyboards.add_to_chat_keyboard((await message.bot.get_me()).username))
 

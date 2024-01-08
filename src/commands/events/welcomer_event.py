@@ -4,6 +4,7 @@ from aiogram import Router
 from aiogram.enums import ChatMemberStatus
 from aiogram.filters import ChatMemberUpdatedFilter, IS_NOT_MEMBER, ADMINISTRATOR, MEMBER, JOIN_TRANSITION
 from aiogram.types import ChatMemberUpdated, ChatPermissions, CallbackQuery
+from aiogram_i18n import I18nContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.utils import keyboards, database, utils, ChatInfo, CaptchaCallbackFactory
@@ -13,26 +14,24 @@ router = Router()
 
 # Добавляю чат в бд если добавили бота в него
 @router.my_chat_member(ChatMemberUpdatedFilter(member_status_changed=IS_NOT_MEMBER >> MEMBER))
-async def event_new_chat(event: ChatMemberUpdated, session: AsyncSession) -> None:
+async def event_new_chat(event: ChatMemberUpdated, session: AsyncSession, i18n: I18nContext) -> None:
     await database.add_chat(session, event.chat.id)
     await event.bot.send_message(
-        event.chat.id,
-        f'Привет. Для того что бы я мог управлять этим чатом мне необходимы права администратора.'
+        event.chat.id, text=i18n.get('events-welcomer-newchat-noadmin')
     )
 
 
 @router.my_chat_member(ChatMemberUpdatedFilter(member_status_changed=(IS_NOT_MEMBER | MEMBER) >> ADMINISTRATOR))
-async def event_new_chat(event: ChatMemberUpdated, session: AsyncSession) -> None:
+async def event_new_chat(event: ChatMemberUpdated, session: AsyncSession, i18n: I18nContext) -> None:
     await database.add_chat(session, event.chat.id)
     await event.bot.send_message(
-        event.chat.id,
-        f'Бот добавлен в качестве админстратора этого чата.'
+        event.chat.id, i18n.get('events-welcomer-newchat-admin')
     )
 
 
 # Приветствие нового участника
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=JOIN_TRANSITION))
-async def event_new_member(event: ChatMemberUpdated, session: AsyncSession) -> None:
+async def event_new_member(event: ChatMemberUpdated, session: AsyncSession, i18n: I18nContext) -> None:
     if await utils.is_cas_ban(event.from_user.id):
         await event.chat.ban(user_id=event.from_user.id)
 
@@ -75,8 +74,9 @@ async def event_new_member(event: ChatMemberUpdated, session: AsyncSession) -> N
     if member.status in (ChatMemberStatus.RESTRICTED,) and not member.can_send_messages:
         await event.bot.send_message(
             event.chat.id,
-            f'Привет {name}, если тебя не замутил админ, то ты пропустил сообщение с кнопкой при первом входе, найди его с помощью \"<code>@</code>\" в поиске.'
+            i18n.get('events-welcomer-captcha_not_solved', name=name)
         )
+        return
 
     try:
         await event.chat.restrict(
@@ -99,24 +99,24 @@ async def event_new_member(event: ChatMemberUpdated, session: AsyncSession) -> N
     except Exception as e:
         await event.bot.send_message(
             chat_id=event.chat.id,
-            text=f'Не получилось замутить пользователя.\n\nОшибка: <code>{e}</code>'
+            text=i18n.get('common-errors-cant_mute', exception=e)
         )
 
 
 # Обработка кнопки в капче
 @router.callback_query(CaptchaCallbackFactory.filter())  # Принимаю калбек команды
-async def callback_captcha(callback: CallbackQuery, callback_data: CaptchaCallbackFactory) -> None:
+async def callback_captcha(callback: CallbackQuery, callback_data: CaptchaCallbackFactory, i18n: I18nContext) -> None:
     date = callback_data.date
     date_now = int(time())
     user = callback_data.user
     chat = callback_data.chat
     if callback.from_user.id != user:
-        await callback.answer(text='Эта кнопка не для тебя.', show_alert=True)
+        await callback.answer(text=i18n.get('callback-button_not_your'), show_alert=True)
         return
 
     if date_now < date:
         await callback.answer(
-            text=f'Кнопка заработает через {utils.inflect_with_num(date - date_now, ("секунда", "cекунд", "cекунды"))}',
+            text=i18n.get('callback-button_become_active_in', seconds=date - date_now),
             show_alert=True)
         return
 
@@ -146,5 +146,5 @@ async def callback_captcha(callback: CallbackQuery, callback_data: CaptchaCallba
     except Exception as e:
         await callback.bot.send_message(
             chat_id=callback.message.chat.id,
-            text=f'Не получилось размутить пользователя.\n\nОшибка: <code>{e}</code>'
+            text=i18n.get('common-errors-cant_unmute', exception=e)
         )

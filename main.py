@@ -26,7 +26,7 @@ async def main() -> None:
         core=FluentRuntimeCore(
             path="src/resources/locales/{locale}",
             raise_key_error=False,
-            locales_map={enums.Locale.RU: enums.Locale.EN},
+            locales_map={enums.Locale.EN: enums.Locale.RU},
         ),
         manager=middlewares.UserManager(),
         default_locale=enums.Locale.DEFAULT,
