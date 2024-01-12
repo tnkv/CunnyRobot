@@ -4,6 +4,7 @@ import aiogram.exceptions
 from aiogram import Router
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message, ChatPermissions
+from aiogram_i18n import I18nContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.commands.restrictions.warns import delwarn, check_warns
@@ -18,11 +19,16 @@ router.include_routers(
 
 
 @router.message(Command(commands=['warn']), filters.AdminFilter(), filters.NeedReplyFilter())
-async def command_warn(message: Message, command: CommandObject, session: AsyncSession, chat_info: ChatInfo) -> Message:
+async def command_warn(
+        message: Message,
+        command: CommandObject,
+        session: AsyncSession,
+        chat_info: ChatInfo,
+        i18n: I18nContext) -> Message:
     if message.from_user.id == message.reply_to_message.from_user.id:
-        return await message.reply('Не могу выдать предупреждение тебе, зачем ты варнишь самого себя.')
+        return await message.reply(i18n.get('command-warn-cant_warn_self'))
     if await utils.is_admin(message.reply_to_message.from_user.id, message):
-        return await message.reply('Не могу выдать предупреждение администратору.')
+        return await message.reply(i18n.get('command-warn-cant_warn_admin'))
 
     warn = Warns(TelegramChatID=message.chat.id,
                  TelegramUserID=message.reply_to_message.from_user.id,
@@ -58,20 +64,27 @@ async def command_warn(message: Message, command: CommandObject, session: AsyncS
                     can_send_messages=False
                 )
             )
-            msg = (f'Пользователь {target_name} получил {warn_count}/{chat_info.warns_count_trigger} предупреждений. '
-                   'В качестве наказания был выдан мут на 1 неделю.\n\n'
-                   f'{check_warns.display_warns(all_warns)}')
-            return await message.answer(msg)
+            return await message.answer(
+                text=i18n.get(
+                    'command-warn-warn_limit',
+                    name=target_name,
+                    warn_number=warn_count,
+                    warn_number_limit=chat_info.warns_count_trigger,
+                    warn_displa=check_warns.display_warns(all_warns, i18n)
+                )
+            )
         except aiogram.exceptions.TelegramBadRequest as e:
-            return await message.answer(f'Не получилось замутить пользователя.\n\nОшибка: <code>{e}</code>')
-
-    msg = (f'Администратор {admin_name} выдал предупреждение {target_name}\n\n'
-           f'Теперь пользователь имеет {warn_count}/{chat_info.warns_count_trigger} предупреждений.\n'
-           f'Причина: {warn.Reason}\n'
-           f'В случае достижения лимита, пользователь получит мут на 1 неделю.')
+            return await message.answer(i18n.get('common-errors-cant_mute', exception=str(e)))
 
     await message.answer(
-        text=msg,
+        text=i18n.get(
+            'command-warn-warn',
+            admin_name=admin_name,
+            name=target_name,
+            warn_number=warn_count,
+            warn_number_limit=chat_info.warns_count_trigger,
+            warn_reason=warn.Reason
+        ),
         reply_markup=keyboards.delwarn_keyboard(
             warn.WarnID,
             warn.TelegramUserID

@@ -35,7 +35,7 @@ async def callback_settings_comments(callback: CallbackQuery, session: AsyncSess
 
 
 @router.callback_query(F.data == 'settings_main_btn', filters.CallbackAdminFilter())
-async def callback_settings(callback: CallbackQuery, session: AsyncSession, chat_info: ChatInfo) -> None:
+async def callback_settings(callback: CallbackQuery, chat_info: ChatInfo) -> None:
     name = utils.name_format(callback.from_user.id,
                              callback.from_user.username,
                              callback.from_user.first_name,
@@ -50,7 +50,7 @@ async def callback_settings(callback: CallbackQuery, session: AsyncSession, chat
 
 
 @router.callback_query(F.data == 'settings_filters_btn', filters.CallbackAdminFilter())
-async def callback_filters(callback: CallbackQuery, session: AsyncSession, chat_info: ChatInfo) -> None:
+async def callback_filters(callback: CallbackQuery, chat_info: ChatInfo) -> None:
     name = utils.name_format(callback.from_user.id,
                              callback.from_user.username,
                              callback.from_user.first_name,

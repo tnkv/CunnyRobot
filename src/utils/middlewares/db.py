@@ -21,6 +21,8 @@ class DbSessionMiddleware(BaseMiddleware):
     ) -> Any:
         async with self.session_pool() as session:
             data["session"] = session
+            if not (event.message or event.callback_query):
+                return await handler(event, data)
 
             chat_type = event.message.chat.type if event.message else event.callback_query.message.chat.type
             if chat_type != ChatType.PRIVATE:

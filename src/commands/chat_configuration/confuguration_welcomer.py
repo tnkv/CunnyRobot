@@ -21,7 +21,7 @@ class SetWelcomeTime(StatesGroup):
 
 
 @router.callback_query(F.data == 'settings_enter_btn', filters.CallbackAdminFilter())
-async def callback_enter(callback: CallbackQuery, session: AsyncSession, chat_info: ChatInfo) -> None:
+async def callback_enter(callback: CallbackQuery, chat_info: ChatInfo) -> None:
     name = utils.name_format(callback.from_user.id,
                              callback.from_user.username,
                              callback.from_user.first_name,
