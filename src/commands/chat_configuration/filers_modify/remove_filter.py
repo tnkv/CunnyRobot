@@ -37,8 +37,7 @@ async def cancel_fsm(callback: CallbackQuery, state: FSMContext):
 
 
 @router.message(RemoveFilter.removable_id)
-async def filterremove_waitid(message: Message, session: AsyncSession, state: FSMContext):
-    chat_info = ChatInfo(await database.get_chat_info(session, message.chat.id))
+async def filterremove_waitid(message: Message,  chat_info: ChatInfo, state: FSMContext):
     selected_filter = chat_info.filters_list.get(message.text)
     if selected_filter is None:
         await message.reply(f'Фильтр с ID <code>{message.text}</code> не найден, проверьте написание.')
@@ -55,8 +54,7 @@ async def filterremove_waitid(message: Message, session: AsyncSession, state: FS
 
 
 @router.callback_query(RemoveFilter.confirm_removing, F.data == 'confirm')
-async def cancel_fsm(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
-    chat_info = ChatInfo(await database.get_chat_info(session, callback.message.chat.id))
+async def cancel_fsm(callback: CallbackQuery, session: AsyncSession, chat_info: ChatInfo, state: FSMContext):
     data = await state.get_data()
     chat_info.remove_filter(data.get('filter_id'))
     await callback.message.edit_text('<b>Фильтр удалён</b>\n')

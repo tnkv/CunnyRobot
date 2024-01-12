@@ -9,12 +9,13 @@ router = Router()
 
 
 @router.message(Command(commands=['give_immune', 'give_immunity']), filters.AdminFilter(), filters.NeedReplyFilter())
-async def command_give_immune(message: Message, session: AsyncSession) -> None:
-    chat_info = ChatInfo(await database.get_chat_info(session, message.chat.id))
-    name = utils.name_format(message.reply_to_message.from_user.id,
-                             message.reply_to_message.from_user.username,
-                             message.reply_to_message.from_user.first_name,
-                             message.reply_to_message.from_user.last_name)
+async def command_give_immune(message: Message, session: AsyncSession, chat_info: ChatInfo) -> None:
+    name = utils.name_format(
+        message.reply_to_message.from_user.id,
+        message.reply_to_message.from_user.username,
+        message.reply_to_message.from_user.first_name,
+        message.reply_to_message.from_user.last_name
+    )
 
     if not chat_info.add_immune(message.reply_to_message.from_user.id):
         await message.reply(f'У пользователя {name} уже был иммунитет от трибунала.\n\n'
@@ -29,13 +30,15 @@ async def command_give_immune(message: Message, session: AsyncSession) -> None:
 
 
 # Отмена иммунитета
-@router.message(Command(commands=['revoke_immune', 'revoke_immunity']), filters.AdminFilter(), filters.NeedReplyFilter())
-async def command_revoke_immune(message: Message, session: AsyncSession) -> None:
-    chat_info = ChatInfo(await database.get_chat_info(session, message.chat.id))
-    name = utils.name_format(message.reply_to_message.from_user.id,
-                             message.reply_to_message.from_user.username,
-                             message.reply_to_message.from_user.first_name,
-                             message.reply_to_message.from_user.last_name)
+@router.message(Command(commands=['revoke_immune', 'revoke_immunity']), filters.AdminFilter(),
+                filters.NeedReplyFilter())
+async def command_revoke_immune(message: Message, session: AsyncSession, chat_info: ChatInfo) -> None:
+    name = utils.name_format(
+        message.reply_to_message.from_user.id,
+        message.reply_to_message.from_user.username,
+        message.reply_to_message.from_user.first_name,
+        message.reply_to_message.from_user.last_name
+    )
 
     if not chat_info.revoke_immune(message.reply_to_message.from_user.id):
         await message.reply(f'У пользователя {name} отсутствовал иммунитет к трибуналу.\n\n'
@@ -51,9 +54,8 @@ async def command_revoke_immune(message: Message, session: AsyncSession) -> None
 
 # Проверка наличия иммунитета
 @router.message(Command(commands=['check']))
-async def command_check(message: Message, session: AsyncSession) -> None:
+async def command_check(message: Message, chat_info: ChatInfo) -> None:
     is_initiator_admin = await utils.is_admin(message.from_user.id, message)
-    chat_info = ChatInfo(await database.get_chat_info(session, message.chat.id))
 
     if not message.reply_to_message:
         await message.reply(

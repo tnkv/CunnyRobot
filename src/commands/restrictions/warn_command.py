@@ -18,7 +18,7 @@ router.include_routers(
 
 
 @router.message(Command(commands=['warn']), filters.AdminFilter(), filters.NeedReplyFilter())
-async def command_warn(message: Message, command: CommandObject, session: AsyncSession) -> Message:
+async def command_warn(message: Message, command: CommandObject, session: AsyncSession, chat_info: ChatInfo) -> Message:
     if message.from_user.id == message.reply_to_message.from_user.id:
         return await message.reply('Не могу выдать предупреждение тебе, зачем ты варнишь самого себя.')
     if await utils.is_admin(message.reply_to_message.from_user.id, message):
@@ -32,7 +32,6 @@ async def command_warn(message: Message, command: CommandObject, session: AsyncS
         warn.Reason = command.args
 
     all_warns = await database.add_warn(session, warn)
-    chat_info = ChatInfo(await database.get_chat_info(session, message.chat.id))
 
     admin_name = utils.name_format(
         message.from_user.id,

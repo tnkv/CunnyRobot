@@ -81,12 +81,11 @@ async def filteradd_fullmatch_no(callback: CallbackQuery, state: FSMContext):
 
 
 @router.callback_query(AddFilter.filter_confirm, F.data == 'confirm')
-async def filteradd_added(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
+async def filteradd_added(callback: CallbackQuery, session: AsyncSession, chat_info: ChatInfo, state: FSMContext):
     data = await state.get_data()
     await callback.message.edit_text(
         text=f'Фильтр <code>{data.get("regex", "Default String")}</code> добавлен!\n'
              'Сообщения от пользователей с правами администратора удаляться не будут.')
-    chat_info = ChatInfo(await database.get_chat_info(session, callback.message.chat.id))
     chat_info.add_filter(regex=data.get("regex"),
                          full_match=data.get("full_match"))
     await database.set_chat_info(session, chat_info.export())

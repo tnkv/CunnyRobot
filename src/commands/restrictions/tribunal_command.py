@@ -14,7 +14,7 @@ router = Router()
 
 # Трибунал
 @router.message(Command('tribunal'))
-async def command_tribunal(message: Message, session: AsyncSession) -> None:
+async def command_tribunal(message: Message, session: AsyncSession, chat_info: ChatInfo) -> None:
     if not message.reply_to_message:  # Проверка что ответ на сообщение
         await message.reply(
             'Команду /tribunal надо писать в ответ на сообщение человека, за ссылку в гулаг которого вы хотите начать голосование')
@@ -24,7 +24,6 @@ async def command_tribunal(message: Message, session: AsyncSession) -> None:
         await message.reply('Нельзя начать трибунал против себя.')
         return
 
-    chat_info = ChatInfo(await database.get_chat_info(session, message.chat.id))
     target_id = message.reply_to_message.from_user.id
     target = await message.chat.get_member(user_id=target_id)
     name = utils.name_format(message.reply_to_message.from_user.id,
@@ -111,8 +110,7 @@ async def command_tribunal(message: Message, session: AsyncSession) -> None:
 
 # Обработка отмены трибунала
 @router.callback_query(F.data == 'cancel_tribunal', filters.CallbackAdminFilter(False))
-async def callback_cancel_tribunal(callback: CallbackQuery, session: AsyncSession) -> None:
-    chat_info = ChatInfo(await database.get_chat_info(session, callback.message.chat.id))
+async def callback_cancel_tribunal(callback: CallbackQuery, session: AsyncSession, chat_info: ChatInfo) -> None:
     chat_info.set_tribunal_timeout(int(time()))
     await database.set_chat_info(session, chat_info.export())
     try:
