@@ -4,9 +4,8 @@ from aiogram import Router
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
 from aiogram_i18n import I18nContext
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.utils import database, utils, ChatInfo
+from src.utils import utils, ChatInfo
 
 router = Router()
 
@@ -19,7 +18,7 @@ service_message_types = [
 
 class CommentsFilter(BaseFilter):
 
-    async def __call__(self, message: Message, session: AsyncSession) -> bool:
+    async def __call__(self, message: Message, chat_info: ChatInfo) -> bool:
         if message.left_chat_member and message.left_chat_member.id == message.bot.id:
             return False
 
@@ -31,8 +30,6 @@ class CommentsFilter(BaseFilter):
         if await utils.is_admin(message.from_user.id, message) and not is_service:
             return False
 
-        chat_info = ChatInfo(await database.get_chat_info(session, message.chat.id))
-
         if not chat_info.is_comments:
             return False
 
@@ -40,14 +37,12 @@ class CommentsFilter(BaseFilter):
 
 
 class CustomFilters(BaseFilter):
-    async def __call__(self, message: Message, session: AsyncSession) -> bool:
+    async def __call__(self, message: Message, chat_info: ChatInfo) -> bool:
         if message.left_chat_member and message.left_chat_member.id == message.bot.id:
             return False
         
         if await utils.is_admin(message.from_user.id, message):
             return False
-
-        chat_info = ChatInfo(await database.get_chat_info(session, message.chat.id))
 
         if not chat_info.filters_enabled:
             return False

@@ -20,17 +20,17 @@ async def main() -> None:
     async with engine.begin() as conn:
         await conn.run_sync(db.Base.metadata.create_all)
 
-    dp.update.middleware(middlewares.DbSessionMiddleware(session_pool=sessionmaker))
-
     i18n_middleware = dp["i18n_middleware"] = I18nMiddleware(
         core=FluentRuntimeCore(
             path="src/resources/locales/{locale}",
             raise_key_error=False,
             locales_map={enums.Locale.EN: enums.Locale.RU},
         ),
-        manager=middlewares.UserManager(),
+        manager=middlewares.LocaleManager(),
         default_locale=enums.Locale.DEFAULT,
     )
+
+    dp.update.outer_middleware(middlewares.DbSessionMiddleware(session_pool=sessionmaker))
     i18n_middleware.setup(dispatcher=dp)
 
     dp.include_routers(

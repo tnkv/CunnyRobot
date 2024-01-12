@@ -1,7 +1,7 @@
 from .db import DbSessionMiddleware
-from .i18n import UserManager
+from .i18n import LocaleManager
 
 __all__ = [
     "DbSessionMiddleware",
-    "UserManager"
+    "LocaleManager"
 ]

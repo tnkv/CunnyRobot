@@ -16,5 +16,6 @@ DEFAULT_CHAT_SETTINGS = {
     'channel_whitelist': [],
     'warns_count_trigger': 3,
     'filters_enabled': False,
-    'filters_list': {}
+    'filters_list': {},
+    'chat_language': 'ru'
 }
