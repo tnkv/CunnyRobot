@@ -10,37 +10,32 @@ router = Router()
 
 
 @router.message(Command(commands=['give_immune', 'give_immunity']), filters.AdminFilter(), filters.NeedReplyFilter())
-async def command_give_immune(message: Message, session: AsyncSession, chat_info: ChatInfo, i18n: I18nContext) -> Message:
-    name = utils.name_format(
-        message.reply_to_message.from_user.id,
-        message.reply_to_message.from_user.username,
-        message.reply_to_message.from_user.first_name,
-        message.reply_to_message.from_user.last_name
-    )
+async def command_give_immune(message: Message, session: AsyncSession, chat_info: ChatInfo,
+                              i18n: I18nContext) -> Message:
+    name = utils.NameFormat(message.reply_to_message.from_user)
 
     if not chat_info.add_immune(message.reply_to_message.from_user.id):
-        return await message.reply(i18n.get('command-immunity-give-already', name=name))
+        return await message.reply(i18n.get('command-immunity-give-already', name=name.get()))
 
     await database.set_chat_info(session, chat_info.export())
-    await message.reply(i18n.get('command-immunity-give', name=name))
+    await message.reply(i18n.get('command-immunity-give', name=name.get()))
 
 
 # Отмена иммунитета
 @router.message(Command(commands=['revoke_immune', 'revoke_immunity']), filters.AdminFilter(),
                 filters.NeedReplyFilter())
-async def command_revoke_immune(message: Message, session: AsyncSession, chat_info: ChatInfo, i18n: I18nContext) -> Message:
-    name = utils.name_format(
-        message.reply_to_message.from_user.id,
-        message.reply_to_message.from_user.username,
-        message.reply_to_message.from_user.first_name,
-        message.reply_to_message.from_user.last_name
-    )
+async def command_revoke_immune(
+        message: Message,
+        session: AsyncSession,
+        chat_info: ChatInfo,
+        i18n: I18nContext) -> Message:
+    name = utils.NameFormat(message.reply_to_message.from_user)
 
     if not chat_info.revoke_immune(message.reply_to_message.from_user.id):
-        return await message.reply(i18n.get('command-immunity-revoke-already', name=name))
+        return await message.reply(i18n.get('command-immunity-revoke-already', name=name.get()))
 
     await database.set_chat_info(session, chat_info.export())
-    await message.reply(i18n.get('command-immunity-revoke', name=name))
+    await message.reply(i18n.get('command-immunity-revoke', name=name.get()))
 
 
 # Проверка наличия иммунитета

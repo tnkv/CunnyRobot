@@ -14,6 +14,10 @@ common-errors-cant_ban =
     Не удалось заблокировать пользователя.
 
     Ошибка: <code>{ $exception }</code>
+common-errors-global =
+    Произошла ошибка!
+
+    Ошибка: <code> {$exception} </code>
 common-need_reply = А ответить на сообщение?
 common-need_admin_rights = Ты не админ.
 common-super_admin_not_set = ADMIN_ID не установлена как переменная окружения.
@@ -102,3 +106,20 @@ command-immunity-revoke =
 
     Проверить наличие можно через /check
     Выдать иммунитет можно через /give_immune
+
+command-tribunal-need_reply =
+    Команду /tribunal надо писать в ответ на сообщение человека, за ссылку в гулаг которого вы хотите начать голосование
+command-tribunal-cant_self = Нельзя начать трибунал против себя.
+command-tribunal-user_immune = У пользователя иммунитет от трибунала.
+command-tribunal-user_already_restricted = Невозможно начать трибунал, пользователь уже ограничен.
+command-tribunal-timeout-active = В чате есть активный трибунал, перед началом нового подождите { $time } секунд.
+command-tribunal-timeout = Перед началом нового трибунала, подождите { $time } секунд.
+command-tribunal-poll_title = Трибунал { $name }
+command-tribunal-poll_option-yes = 'За'
+command-tribunal-poll_option-no = 'Против'
+command-tribunal-insufficient_votes =
+    В голосовании за ссылку { $name } приняло слишком мало людей. Минимальное общее количество голосов для признания голосования легитимным - 3
+command-tribunal-insufficient_yesvotes =
+    Голосование за мут { $name } закончилось с { $mute_votes_percent }% голосов за, но для мута требуется хотя бы 66%, пользователь не будет замучен.
+command-tribunal-another_restriction = Трибунал завершён, но во время ожидания пользователь получил другое наказание.
+command-tribunal-finish = Голосование за мут { $name } закончилось с { $mute_votes_percent }% голосов за, пользователь отправляется в мут на { $mute_period } минут.

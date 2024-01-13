@@ -17,37 +17,27 @@ async def command_checkwarns(message: Message, session: AsyncSession, i18n: I18n
             message.chat.id,
             message.from_user.id
         )
-        name = utils.name_format(
-            message.from_user.id,
-            message.from_user.username,
-            message.from_user.first_name,
-            message.from_user.last_name
-        )
+        name = utils.NameFormat(message.from_user)
 
         if len(warns) == 0:
             return await message.reply(text=i18n.get('command-warn-check-nowarns_self'))
 
-        return await message.reply(display_warns(warns, i18n, name))
+        return await message.reply(display_warns(warns, i18n, name.get()))
 
     is_initiator_admin = await utils.is_admin(message.from_user.id, message)
     if not is_initiator_admin:
         return await message.reply(text=i18n.get('common-need_admin_rights'))
 
-    target_name = utils.name_format(
-        message.reply_to_message.from_user.id,
-        message.reply_to_message.from_user.username,
-        message.reply_to_message.from_user.first_name,
-        message.reply_to_message.from_user.last_name
-    )
+    target_name = utils.NameFormat(message.reply_to_message.from_user)
     warns = await database.get_warns(
         session,
         message.chat.id,
         message.reply_to_message.from_user.id
     )
     if len(warns) == 0:
-        return await message.reply(text=i18n.get('command-warn-check-nowarns', name=target_name))
+        return await message.reply(text=i18n.get('command-warn-check-nowarns', name=target_name.get()))
 
-    return await message.reply(display_warns(warns, i18n, target_name))
+    return await message.reply(display_warns(warns, i18n, target_name.get()))
 
 
 def display_warns(warns: list, i18n: I18nContext, user: str = None):

@@ -62,17 +62,13 @@ async def event_new_member(event: ChatMemberUpdated, chat_info: ChatInfo, i18n: 
         return
 
     member = await event.chat.get_member(user_id=event.from_user.id)
-    name = utils.name_format(
-        event.from_user.id,
-        event.from_user.username,
-        event.from_user.first_name,
-        event.from_user.last_name
-    )
+
+    name = utils.NameFormat(event.from_user)
 
     if member.status in (ChatMemberStatus.RESTRICTED,) and not member.can_send_messages:
         await event.bot.send_message(
             event.chat.id,
-            i18n.get('events-welcomer-captcha_not_solved', name=name)
+            i18n.get('events-welcomer-captcha_not_solved', name=name.get())
         )
         return
 
@@ -83,7 +79,7 @@ async def event_new_member(event: ChatMemberUpdated, chat_info: ChatInfo, i18n: 
             permissions=ChatPermissions(can_send_messages=False)
         )
         welcome_message_text = chat_info.welcome_message_text.format(
-            user=name) if '{user}' in chat_info.welcome_message_text else chat_info.welcome_message_text
+            user=name.get()) if '{user}' in chat_info.welcome_message_text else chat_info.welcome_message_text
 
         await event.bot.send_message(
             chat_id=event.chat.id,

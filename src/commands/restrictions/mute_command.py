@@ -14,19 +14,18 @@ async def command_mute(message: Message, i18n: I18nContext) -> Message | None:
         return await message.reply(i18n.get('command-mute-immune_user'))
 
     msg = message.text.split(' ')
-    target_name = utils.name_format(
-        message.reply_to_message.from_user.id,
-        message.reply_to_message.from_user.username,
-        message.reply_to_message.from_user.first_name,
-        message.reply_to_message.from_user.last_name
-    )
+    target_name = utils.NameFormat(message.reply_to_message.from_user)
 
     if len(msg) < 2:
         await message.chat.restrict(
             user_id=message.reply_to_message.from_user.id,
             until_date=0,
             permissions=ChatPermissions(can_send_messages=False))
-        return await message.answer(i18n.get('command-mute-mute', name=target_name))
+        return await message.answer(
+            i18n.get(
+                'command-mute-mute', name=target_name.get()
+            )
+        )
 
     await message.chat.restrict(
         user_id=message.reply_to_message.from_user.id,
@@ -34,4 +33,10 @@ async def command_mute(message: Message, i18n: I18nContext) -> Message | None:
         permissions=ChatPermissions(can_send_messages=False)
     )
 
-    await message.answer(i18n.get('command-mute-mute', name=target_name, period=msg[1]))
+    await message.answer(
+        i18n.get(
+            'command-mute-mute',
+            name=target_name.get(),
+            period=msg[1]
+        )
+    )

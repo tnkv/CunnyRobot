@@ -22,14 +22,11 @@ class SetWelcomeTime(StatesGroup):
 
 @router.callback_query(F.data == 'settings_enter_btn', filters.CallbackAdminFilter())
 async def callback_enter(callback: CallbackQuery, chat_info: ChatInfo) -> None:
-    name = utils.name_format(callback.from_user.id,
-                             callback.from_user.username,
-                             callback.from_user.first_name,
-                             callback.from_user.last_name)
+    name = utils.NameFormat(callback.from_user)
     try:
         await callback.message.edit_text(text='<b>Конфигурация чата</b>\n'
                                               f'<b>Настройки входа</b>\n\n'
-                                              f'{name}, используй кнопки ниже для управление чатом.',
+                                              f'{name.get()}, используй кнопки ниже для управление чатом.',
                                          reply_markup=keyboards.configuration_welcome_keyboard(chat_info))
     except TelegramBadRequest:
         pass
@@ -65,11 +62,9 @@ async def cancel_fsm(message: Message, state: FSMContext):
 async def set_welcome_text(message: Message, state: FSMContext):
     await state.update_data(new_text=message.html_text)
     await message.reply('Теперь все новые участники будут получать следующее сообщение в качестве приветствия:')
-    name = utils.name_format(message.from_user.id,
-                             message.from_user.username,
-                             message.from_user.first_name,
-                             message.from_user.last_name)
-    welcome_message_text = message.html_text.format(user=name) if '{user}' in message.html_text else message.html_text
+    name = utils.NameFormat(message.from_user)
+    welcome_message_text = message.html_text.format(user=name.get()) if '{user}' in message.html_text else message.html_text
+
     await message.answer(welcome_message_text)
     await state.set_state(SetWelcomeText.confirm_welcome_text)
     await message.answer('Подтвердить изменение?', reply_markup=keyboards.confirm_keyboard())

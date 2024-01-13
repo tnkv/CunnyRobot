@@ -36,15 +36,10 @@ async def command_delwarn(message: Message, session: AsyncSession, i18n: I18nCon
         message.chat.id,
         message.reply_to_message.from_user.id
     )
-    target_name = utils.name_format(
-        message.reply_to_message.from_user.id,
-        message.reply_to_message.from_user.username,
-        message.reply_to_message.from_user.first_name,
-        message.reply_to_message.from_user.last_name
-    )
+    target_name = utils.NameFormat(message.reply_to_message.from_user)
 
     if not warns:
-        return await message.reply(text=i18n.get('command-warn-check-nowarns', name=target_name))
+        return await message.reply(text=i18n.get('command-warn-check-nowarns', name=target_name.get()))
 
     warn: Warns = warns[-1]
     warn.IsActive = False
@@ -55,7 +50,7 @@ async def command_delwarn(message: Message, session: AsyncSession, i18n: I18nCon
     await message.reply(
         i18n.get(
             'command-delwarn-delwarn',
-            name=target_name,
+            name=target_name.get(),
             warn_link=link_to_warn,
             warn_count=str(len(warns) - 1)
         )

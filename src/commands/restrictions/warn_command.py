@@ -39,19 +39,8 @@ async def command_warn(
 
     all_warns = await database.add_warn(session, warn)
 
-    admin_name = utils.name_format(
-        message.from_user.id,
-        message.from_user.username,
-        message.from_user.first_name,
-        message.from_user.last_name
-    )
-
-    target_name = utils.name_format(
-        message.reply_to_message.from_user.id,
-        message.reply_to_message.from_user.username,
-        message.reply_to_message.from_user.first_name,
-        message.reply_to_message.from_user.last_name
-    )
+    admin_name = utils.NameFormat(message.from_user)
+    target_name = utils.NameFormat(message.reply_to_message.from_user)
 
     warn_count = len(all_warns)
     if warn_count >= chat_info.warns_count_trigger:
@@ -67,7 +56,7 @@ async def command_warn(
             return await message.answer(
                 text=i18n.get(
                     'command-warn-warn_limit',
-                    name=target_name,
+                    name=target_name.get(),
                     warn_number=warn_count,
                     warn_number_limit=chat_info.warns_count_trigger,
                     warn_displa=check_warns.display_warns(all_warns, i18n)
@@ -79,8 +68,8 @@ async def command_warn(
     await message.answer(
         text=i18n.get(
             'command-warn-warn',
-            admin_name=admin_name,
-            name=target_name,
+            admin_name=admin_name.get(),
+            name=target_name.get(),
             warn_number=warn_count,
             warn_number_limit=chat_info.warns_count_trigger,
             warn_reason=warn.Reason

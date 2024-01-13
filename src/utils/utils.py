@@ -3,21 +3,29 @@ from time import time
 from aiogram.client.session import aiohttp
 from aiogram.utils.markdown import html_decoration
 from aiogram.enums import ChatMemberStatus
-from aiogram.types import Message
+from aiogram.types import Message, User
 
 ANON_ADMIN_ID = 1087968824
 CAS_LINK = 'https://api.cas.chat/check?user_id={user_id}'
 ADMIN_STATUS = (ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR)
 TIME_COEFFICIENT = {'m': 60, 'h': 3600, 'd': 86400, 'w': 604800}
 
-def name_format(UserID: int, userName, firstName, surName,
-                isLink=True) -> str:  # Форматирование имени в зависимости от наличия юзернейма, фамилии итд
-    if userName is not None:
-        return f'<a href="tg://user?id={UserID}">@{userName}</a>' if isLink else f'@{userName}'
-    elif surName is not None:
-        return f'<a href="tg://user?id={UserID}">{html_decoration.quote(firstName)} {html_decoration.quote(surName)}</a>' if isLink else f'{html_decoration.quote(firstName)} {html_decoration.quote(surName)}'
-    return f'<a href="tg://user?id={UserID}">{html_decoration.quote(firstName)}</a>' if isLink else f'{html_decoration.quote(firstName)}'
+class NameFormat:
+    def __init__(self, user: User):
+        self.user_id = user.id
+        self.username = user.username
+        self.first_name = user.first_name
+        self.last_name = user.last_name
 
+    def get(self, is_link=True) -> str:
+        if self.username is not None:
+            return f'<a href="tg://user?id={self.user_id}">@{self.username}</a>' if is_link \
+                else f'@{self.username}'
+        elif self.last_name is not None:
+            return f'<a href="tg://user?id={self.user_id}">{html_decoration.quote(self.first_name)} {html_decoration.quote(self.last_name)}</a>' if is_link \
+                else f'{html_decoration.quote(self.first_name)} {html_decoration.quote(self.last_name)}'
+        return f'<a href="tg://user?id={self.user_id}">{html_decoration.quote(self.first_name)}</a>' if is_link \
+            else f'{html_decoration.quote(self.first_name)}'
 
 # Проверка наличия пользователя в базе CAS
 async def is_cas_ban(TelegramUserID: int) -> bool:
