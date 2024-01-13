@@ -14,7 +14,9 @@ common-errors-cant_ban =
     Не удалось заблокировать пользователя.
 
     Ошибка: <code>{ $exception }</code>
+common-need_reply = А ответить на сообщение?
 common-need_admin_rights = Ты не админ.
+common-super_admin_not_set = ADMIN_ID не установлена как переменная окружения.
 
 callback-button_not_your = Эта кнопка не для тебя.
 callback-button_become_active_in = Кнопка заработает через { $seconds }с.
@@ -67,13 +69,10 @@ command-warn-warn_limit =
 
 
    { $warn_display }
-
 command-warn-display_warns_header = Предупреждения полученные пользователем
 command-warn-display-noreason = Без причины.
-
 command-warn-check-nowarns_self = У вас нет предупреждений.
 command-warn-check-nowarns = У пользователя { $name } нет предупреждений.
-
 callback-delwarn-delwarn = Предупреждение для пользователя <code>{ $user }</code> удалено.
 command-delwarn-nowarns = У пользователя нет предупреждений.
 command-delwarn-delwarn =
@@ -81,3 +80,25 @@ command-delwarn-delwarn =
     Удалённое предупреждение:\n'
     { $warn_link }\n\n'
     У пользователя осталось { $warn_count } предупреждений')
+
+command-immunity-check = f'Наличие иммунитета к трибуналу: { $status }
+command-immunity-give-already =
+    У пользователя { $name } уже был иммунитет от трибунала.
+
+    Проверить наличие можно через /check
+    Забрать иммунитет можно через /revoke_immune
+command-immunity-give =
+    Пользователю { $name } был выдан иммунитет от трибунала.
+
+    Проверить наличие можно через /check
+    Забрать иммунитет можно через /revoke_immune
+command-immunity-revoke-already =
+    У пользователя { $name } отсутствовал иммунитет к трибуналу.
+
+    'Проверить наличие можно через /check
+    'Выдать иммунитет можно через /give_immune
+command-immunity-revoke =
+    У пользователя { $name } был отобран иммунитет от трибунала.
+
+    Проверить наличие можно через /check
+    Выдать иммунитет можно через /give_immune
