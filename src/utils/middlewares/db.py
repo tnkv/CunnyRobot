@@ -24,6 +24,7 @@ class DbSessionMiddleware(BaseMiddleware):
             if not (event.message or event.callback_query):
                 return await handler(event, data)
 
+            data["chat_info"] = None
             chat_type = event.message.chat.type if event.message else event.callback_query.message.chat.type
             if chat_type != ChatType.PRIVATE:
                 chat_id = event.message.chat.id if event.message else event.callback_query.message.chat.id

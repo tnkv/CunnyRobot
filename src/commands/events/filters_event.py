@@ -1,6 +1,8 @@
 import re
+from typing import Optional
 
 from aiogram import Router
+from aiogram.enums import ChatType
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
 from aiogram_i18n import I18nContext
@@ -18,7 +20,9 @@ service_message_types = [
 
 class CommentsFilter(BaseFilter):
 
-    async def __call__(self, message: Message, chat_info: ChatInfo) -> bool:
+    async def __call__(self, message: Message, chat_info: Optional[ChatInfo]) -> bool:
+        if chat_info is None:
+            return False
         if message.left_chat_member and message.left_chat_member.id == message.bot.id:
             return False
 
@@ -37,7 +41,10 @@ class CommentsFilter(BaseFilter):
 
 
 class CustomFilters(BaseFilter):
-    async def __call__(self, message: Message, chat_info: ChatInfo) -> bool:
+    async def __call__(self, message: Message, chat_info: Optional[ChatInfo]) -> bool:
+        if chat_info is None:
+            return False
+
         if message.left_chat_member and message.left_chat_member.id == message.bot.id:
             return False
         
