@@ -228,3 +228,28 @@ command-configuration-filters-remove-confirmation =
     *[other] Да
 }
 command-configuration-filters-remove-removed = <b>Фильтр удалён</b>
+
+command-configuration-welcome =
+    {-configuration-title}
+    {-configuration-title-welcome}
+
+    { $name }, используй кнопки ниже для управления чатом.
+command-configuration-welcome-setwelcome =
+    Для установки нового приветствия напишите его в следующем сообщении.
+
+    Для упоминания пользователя добавь <code>{"{user}"}</code> в тексте.
+    Для форматирования текста используй возможности в клиенте.
+
+    Следующее ввёденное вами сообщение станет приветствием в этом чате, для выхода из режима редактирования выполни команду /cancel
+command-configuration-welcome-setwelcome-preview =
+    Теперь все новые участники будут получать следующее сообщение в качестве приветствия:
+command-configuration-welcome-setwelcome-confirm = Подвердить изменение?
+command-configuration-welcome-setwelcome-set = Новое приветствие установлено.
+command-configuration-welcome-setwelcome-unset = Новое приветствие не будет установлено.
+command-configuration-welcome-settime =
+    Напиши количество секунд (0-300), которое потребуется подождать новому участнику, перед тем как получить возможность снять мут.
+
+    Для выхода из режима редактирования испольуй /cancel
+command-configuration-welcome-settime-no_number = Это не похоже на целое число, попробуй ещё раз.
+command-configuration-welcome-settime-limit = Количество секунд должно удовлетворять условию "0 <= time <= 300"
+command-configuration-welcome-settime-set = Теперь новым учасникам придётся ждать { $seconds } секунд для разблокировки кнопки снятия мута.

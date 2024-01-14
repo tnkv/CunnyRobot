@@ -78,7 +78,7 @@ async def command_tribunal(
     poll = await message.bot.stop_poll(
         chat_id=message.chat.id,
         message_id=msg.message_id,
-        reply_markup=keyboards.ended_tribunal_keyboard()
+        reply_markup=keyboards.ended_tribunal_keyboard(i18n)
     )
 
     if poll.total_voter_count < 3:
@@ -141,7 +141,7 @@ async def callback_cancel_tribunal(
         await callback.bot.stop_poll(
             chat_id=callback.message.chat.id,
             message_id=callback.message.message_id,
-            reply_markup=keyboards.canceled_tribunal_keyboard(name.get(False))
+            reply_markup=keyboards.canceled_tribunal_keyboard(i18n, name.get(False))
         )
     except Exception as e:
         await callback.answer(i18n.get('common-errors-global', exception=str(e)))

@@ -75,6 +75,7 @@ async def command_warn(
             warn_reason=warn.Reason
         ),
         reply_markup=keyboards.delwarn_keyboard(
+            i18n,
             warn.WarnID,
             warn.TelegramUserID
         )

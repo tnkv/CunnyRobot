@@ -85,6 +85,7 @@ async def event_new_member(event: ChatMemberUpdated, chat_info: ChatInfo, i18n: 
             chat_id=event.chat.id,
             text=welcome_message_text,
             reply_markup=keyboards.captcha_keyboard(
+                i18n,
                 int(time()) + chat_info.welcome_message_timeout,
                 event.from_user.id,
                 event.chat.id),

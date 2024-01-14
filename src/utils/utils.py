@@ -46,24 +46,6 @@ async def is_admin(user_id: int, message: Message) -> bool:
 
     return False
 
-
-def inflect_with_num(number: int, forms: tuple[str, str, str]) -> str:
-    # 0 - 1 секунда
-    # 1 - 10 секунд
-    # 2 - 2 секунды
-    units = number % 10
-    tens = number % 100 - units
-
-    if tens == 10 or units >= 5 or units == 0:
-        needed_form = 1
-    elif units > 1:
-        needed_form = 2
-    else:
-        needed_form = 0
-
-    return f'{number} {forms[needed_form]}'
-
-
 def get_restriction_time(duration: str) -> int:
     unit = duration[-1]
     value = int(duration[:-1]) if duration[:-1].isdigit() else 0
