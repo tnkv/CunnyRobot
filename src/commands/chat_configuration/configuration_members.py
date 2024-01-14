@@ -4,7 +4,6 @@ from aiogram.types import CallbackQuery
 from aiogram_i18n import I18nContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.commands.chat_configuration.filers_modify import add_filter, remove_filter
 from src.utils import database, keyboards, ChatInfo, filters, utils
 from src.utils.callback_factory import SetLangFactory
 

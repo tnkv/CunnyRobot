@@ -207,10 +207,10 @@ command-configuration-filters-regex_error =
 command-configuration-filters-confirmation =
     Подтвердить добавление фильтра?
 
-    Регекс: <code>{ $regex }</code>
-    Полное соответствие: { $full_match ->
-    [0] Нет
-    *[other] Да
+    Regex: <code>{ $regex }</code>
+    Тип проверки: { $full_match ->
+    [0] Частичное соответствие
+    *[other] Полное соответствие
 }
 command-configuration-filters-added =
     Фильтр <code>{ $regex }</code> добавлен!
@@ -226,10 +226,10 @@ command-configuration-filters-remove-confirmation =
     В случае подтверждения, выбранный фильтр будет удален.
 
     ID: <code>{ $filter_id }</code>
-    Регекс: <code>{ $regex }</code>
-    Полное соответствие: { $full_match ->
-    [0] Нет
-    *[other] Да
+    Regex: <code>{ $regex }</code>
+    Тип проверки: { $full_match ->
+    [0] Частичное соответствие
+    *[other] Полное соответствие
 }
 command-configuration-filters-remove-removed = <b>Фильтр удалён</b>
 
