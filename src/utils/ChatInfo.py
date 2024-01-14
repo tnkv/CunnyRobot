@@ -96,3 +96,6 @@ class ChatInfo:
 
     def remove_filter(self, filter_id: str):
         self.filters_list.pop(filter_id)
+
+    def set_lang(self, lang):
+        self.chat_language = lang

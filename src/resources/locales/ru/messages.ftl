@@ -141,7 +141,7 @@ keyboards-configuration-main-comment_mode = { $state ->
     *[other] Режим комментареив: включен
     }
 keyboards-configuration-main-enter = Настройки входа
-keyboards-configuration-main-members = Пользователи
+keyboards-configuration-main-members = Участники
 keyboards-configuration-main-filters = Фильтры
 
 keyboards-configuration-welcome-state = { $state ->
@@ -159,6 +159,8 @@ keyboards-configuration-filter-list = Список фильтров ({ $count })
 keyboards-configuration-filter-add = Добавить фильтр
 keyboards-configuration-filter-remove = Удалить фильтр
 
+keyboards-configuration-members-lang = Язык чата ( {$lang} )
+
 keyboards-confirm-yes = Да
 keyboards-confirm-no = Нет
 
@@ -168,6 +170,8 @@ keyboards-add_to_chat = Добавить в чат
 -configuration-title-filters = <b>Фильтры</b>
 -configuration-title-filters-list = <b>Список фильтров</b>
 -configuration-title-welcome = <b>Настройки входа</b>
+-configuration-title-members = <b>Участники</b>
+-configuration-title-members-lang = <b>Выбор языка</b>
 
 command-configuration =
     {-configuration-title}
@@ -253,3 +257,16 @@ command-configuration-welcome-settime =
 command-configuration-welcome-settime-no_number = Это не похоже на целое число, попробуй ещё раз.
 command-configuration-welcome-settime-limit = Количество секунд должно удовлетворять условию "0 <= time <= 300"
 command-configuration-welcome-settime-set = Теперь новым учасникам придётся ждать { $seconds } секунд для разблокировки кнопки снятия мута.
+
+command-configuration-members =
+    {-configuration-title}
+    {-configuration-title-members}
+
+    { $name }, используй кнопки ниже для управления чатом.
+
+command-configuration-members-lang =
+    {-configuration-title}
+    {-configuration-title-members}
+    {-configuration-title-members-lang}
+
+    { $name }, используй кнопки ниже для управления чатом.

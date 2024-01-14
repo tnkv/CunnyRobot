@@ -16,8 +16,10 @@ router.include_routers(add_filter.router,
 async def callback_filters(callback: CallbackQuery, i18n: I18nContext, chat_info: ChatInfo) -> None:
     name = utils.NameFormat(callback.from_user)
     try:
-        await callback.message.edit_text(text=i18n.command.configuration.filters(name=name.get()),
-                                         reply_markup=keyboards.configuration_filter_keyboard(i18n, chat_info))
+        await callback.message.edit_text(
+            text=i18n.command.configuration.filters(name=name.get()),
+            reply_markup=keyboards.configuration_filter_keyboard(i18n, chat_info)
+        )
     except TelegramBadRequest:
         pass
 
