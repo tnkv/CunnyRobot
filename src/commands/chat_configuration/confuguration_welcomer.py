@@ -4,6 +4,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery
+from aiogram_i18n import I18nContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.utils import database, keyboards, utils, ChatInfo, filters
@@ -21,24 +22,25 @@ class SetWelcomeTime(StatesGroup):
 
 
 @router.callback_query(F.data == 'settings_enter_btn', filters.CallbackAdminFilter())
-async def callback_enter(callback: CallbackQuery, chat_info: ChatInfo) -> None:
+async def callback_enter(callback: CallbackQuery, chat_info: ChatInfo, i18n: I18nContext) -> None:
     name = utils.NameFormat(callback.from_user)
     try:
         await callback.message.edit_text(text='<b>Конфигурация чата</b>\n'
                                               f'<b>Настройки входа</b>\n\n'
                                               f'{name.get()}, используй кнопки ниже для управление чатом.',
-                                         reply_markup=keyboards.configuration_welcome_keyboard(chat_info))
+                                         reply_markup=keyboards.configuration_welcome_keyboard(i18n, chat_info))
     except TelegramBadRequest:
         pass
 
 
 @router.callback_query(F.data == 'enter_welcome_btn', filters.CallbackAdminFilter())
-async def callback_enter_welcome(callback: CallbackQuery, session: AsyncSession, chat_info: ChatInfo) -> None:
+async def callback_enter_welcome(callback: CallbackQuery, session: AsyncSession, chat_info: ChatInfo,
+                                 i18n: I18nContext) -> None:
     chat_info.switch_welcome()
     await database.set_chat_info(session, chat_info.export())
     try:
         await callback.message.edit_reply_markup(callback.inline_message_id,
-                                                 reply_markup=keyboards.configuration_welcome_keyboard(chat_info))
+                                                 reply_markup=keyboards.configuration_welcome_keyboard(i18n, chat_info))
     except TelegramBadRequest:
         pass
 
@@ -59,15 +61,16 @@ async def cancel_fsm(message: Message, state: FSMContext):
 
 
 @router.message(SetWelcomeText.wait_for_welcome_text)
-async def set_welcome_text(message: Message, state: FSMContext):
+async def set_welcome_text(message: Message, i18n: I18nContext, state: FSMContext):
     await state.update_data(new_text=message.html_text)
     await message.reply('Теперь все новые участники будут получать следующее сообщение в качестве приветствия:')
     name = utils.NameFormat(message.from_user)
-    welcome_message_text = message.html_text.format(user=name.get()) if '{user}' in message.html_text else message.html_text
+    welcome_message_text = message.html_text.format(
+        user=name.get()) if '{user}' in message.html_text else message.html_text
 
     await message.answer(welcome_message_text)
     await state.set_state(SetWelcomeText.confirm_welcome_text)
-    await message.answer('Подтвердить изменение?', reply_markup=keyboards.confirm_keyboard())
+    await message.answer('Подтвердить изменение?', reply_markup=keyboards.confirm_keyboard(i18n))
 
 
 @router.callback_query(SetWelcomeText.confirm_welcome_text, F.data == 'confirm')

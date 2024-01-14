@@ -64,7 +64,7 @@ async def command_tribunal(
             i18n.get('command-tribunal-poll_option-no')
         ],
         is_anonymous=False,
-        reply_markup=keyboards.cancel_tribunal_keyboard(end_time - int(time()))
+        reply_markup=keyboards.cancel_tribunal_keyboard(i18n, end_time - int(time()))
     )
 
     while time() < end_time:
@@ -73,7 +73,7 @@ async def command_tribunal(
         if ChatInfo(await database.get_chat_info(session, message.chat.id)).last_tribunal_end < time():
             return  # Проверка что трибунал не был отменён администратором
 
-        await msg.edit_reply_markup(reply_markup=keyboards.cancel_tribunal_keyboard(end_time - int(time())))
+        await msg.edit_reply_markup(reply_markup=keyboards.cancel_tribunal_keyboard(i18n, end_time - int(time())))
 
     poll = await message.bot.stop_poll(
         chat_id=message.chat.id,
