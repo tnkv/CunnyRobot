@@ -19,8 +19,8 @@ common-errors-global =
 
     Error code: <code> {$exception} </code>
 common-action_canceled = Action canceled.
-common-need_reply = Need a reply to a message?
-common-need_admin_rights = You're not an admin..
+common-need_reply = You need to reply to the message.
+common-need_admin_rights = You're not an admin.
 common-super_admin_not_set = ADMIN_ID is not set as an environmental variable.
 
 callback-button_not_your = This button is not for you.
@@ -44,7 +44,7 @@ command-is_cas_ban-incorrect_telegram_id =
 
     <i>Powered by https://cas.chat/api</i>
 command-is_cas_ban =
-    Ban status in CAS:: { $status }
+    Ban status in CAS: { $status }
 
     <i>Powered by https://cas.chat/api</i>
 
