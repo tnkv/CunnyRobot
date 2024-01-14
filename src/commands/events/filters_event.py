@@ -3,9 +3,9 @@ import re
 from aiogram import Router
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
-from sqlalchemy.ext.asyncio import AsyncSession
+from aiogram_i18n import I18nContext
 
-from src.utils import database, utils, ChatInfo
+from src.utils import utils, ChatInfo
 
 router = Router()
 
@@ -18,7 +18,7 @@ service_message_types = [
 
 class CommentsFilter(BaseFilter):
 
-    async def __call__(self, message: Message, session: AsyncSession) -> bool:
+    async def __call__(self, message: Message, chat_info: ChatInfo) -> bool:
         if message.left_chat_member and message.left_chat_member.id == message.bot.id:
             return False
 
@@ -30,8 +30,6 @@ class CommentsFilter(BaseFilter):
         if await utils.is_admin(message.from_user.id, message) and not is_service:
             return False
 
-        chat_info = ChatInfo(await database.get_chat_info(session, message.chat.id))
-
         if not chat_info.is_comments:
             return False
 
@@ -39,14 +37,12 @@ class CommentsFilter(BaseFilter):
 
 
 class CustomFilters(BaseFilter):
-    async def __call__(self, message: Message, session: AsyncSession) -> bool:
+    async def __call__(self, message: Message, chat_info: ChatInfo) -> bool:
         if message.left_chat_member and message.left_chat_member.id == message.bot.id:
             return False
         
         if await utils.is_admin(message.from_user.id, message):
             return False
-
-        chat_info = ChatInfo(await database.get_chat_info(session, message.chat.id))
 
         if not chat_info.filters_enabled:
             return False
@@ -60,16 +56,16 @@ class CustomFilters(BaseFilter):
 
 
 @router.message(CommentsFilter())
-async def comments_mode(message: Message) -> None:
+async def comments_mode(message: Message, i18n: I18nContext) -> None:
     try:
         await message.delete()
     except Exception as e:
-        await message.answer(f'Не удалось удалить сообщение.\n\nОшибка: <code>{e}</code>')
+        await message.answer(i18n.get("common-errors-cant_delete_msg", exception=str(e)))
 
 
 @router.message(CustomFilters())
-async def comments_mode(message: Message) -> None:
+async def comments_mode(message: Message, i18n: I18nContext) -> None:
     try:
         await message.delete()
     except Exception as e:
-        await message.answer(f'Не удалось удалить сообщение.\n\nОшибка: <code>{e}</code>')
+        await message.answer(i18n.get("common-errors-cant_delete_msg", exception=str(e)))

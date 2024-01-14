@@ -19,6 +19,7 @@ class ChatInfo:
     warns_count_trigger = DEFAULT_CHAT_SETTINGS.get('warns_count_trigger', 3)
     filters_enabled = DEFAULT_CHAT_SETTINGS.get('filters_enabled', False)
     filters_list = DEFAULT_CHAT_SETTINGS.get('filters_list', {})
+    chat_language = DEFAULT_CHAT_SETTINGS.get('chat_language', 'ru')
 
     def __init__(self, chat_in_db: TribunalBot | None):
         if chat_in_db is None:
@@ -26,7 +27,6 @@ class ChatInfo:
 
         self.chat_id: int = chat_in_db.TelegramChatID
         self.last_tribunal_end: int = chat_in_db.LastTribunalEnd
-
         chat_settings = json.loads(chat_in_db.ChatSettings)
         self.welcome_message: bool = chat_settings.get('welcome_message', self.welcome_message)
         self.welcome_message_text: str = chat_settings.get('welcome_message_text', self.welcome_message_text)
@@ -35,8 +35,10 @@ class ChatInfo:
         self.is_comments: bool = chat_settings.get('is_comments', self.is_comments)
         self.ban_channel: bool = chat_settings.get('ban_channel', self.ban_channel)
         self.channel_whitelist: list = chat_settings.get('channel_whitelist', self.channel_whitelist)
+        self.warns_count_trigger = chat_settings.get('warns_count_trigger', self.warns_count_trigger)
         self.filters_enabled: bool = chat_settings.get('filters_enabled', self.filters_enabled)
         self.filters_list: dict = chat_settings.get('filters_list', self.filters_list)
+        self.chat_language: str = chat_settings.get('chat_language', self.chat_language)
 
     def export(self) -> TribunalBot:
         settings = {
@@ -45,8 +47,10 @@ class ChatInfo:
             'welcome_message_timeout': self.welcome_message_timeout,
             'tribunal_immunity': self.tribunal_immunity,
             'is_comments': self.is_comments,
+            'warns_count_trigger': self.warns_count_trigger,
             'filters_enabled': self.filters_enabled,
-            'filters_list': self.filters_list
+            'filters_list': self.filters_list,
+            'chat_language': self.chat_language
         }
 
         return TribunalBot(TelegramChatID=self.chat_id,
@@ -92,3 +96,6 @@ class ChatInfo:
 
     def remove_filter(self, filter_id: str):
         self.filters_list.pop(filter_id)
+
+    def set_lang(self, lang):
+        self.chat_language = lang

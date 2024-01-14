@@ -1,7 +1,7 @@
 from aiogram import Router
 
 from src.commands.restrictions import ban_command, mute_command, um_command, tribunal_command, immunity_command, warn_command
-from src.commands.chat_configuration import configuration, confuguration_welcomer, confuguration_filters
+from src.commands.chat_configuration import configuration, confuguration_welcomer, confuguration_filters, configuration_members
 from src.commands.events import welcomer_event, filters_event, callback
 from src.commands.utility import cas_ban_check, status_command, start_command
 from src.commands.fun import moscow
@@ -20,7 +20,8 @@ configuration_commands = Router()
 configuration_commands.include_routers(
     configuration.router,
     confuguration_welcomer.router,
-    confuguration_filters.router
+    confuguration_filters.router,
+    configuration_members.router
 )
 
 events_commands = Router()

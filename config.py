@@ -3,6 +3,8 @@ from os import getenv
 BOT_TOKEN = getenv('TOKEN')
 ADMIN_ID = int(getenv('ADMIN_ID', 0))
 
+LOCALES = ('ru', 'en')
+
 DB_FILE = 'tribunalbot.db'
 DB_URL = 'sqlite+aiosqlite:///tribunalbot.db'
 
@@ -16,5 +18,6 @@ DEFAULT_CHAT_SETTINGS = {
     'channel_whitelist': [],
     'warns_count_trigger': 3,
     'filters_enabled': False,
-    'filters_list': {}
+    'filters_list': {},
+    'chat_language': 'ru'
 }

@@ -15,3 +15,9 @@ class DelwarnCallbackFactory(CallbackData, prefix="delwarn"):
     """
     warn_id: int
     user_id: int
+
+class SetLangFactory(CallbackData, prefix="setlang"):
+    """
+    Обработка установки языка в чате
+    """
+    lang: str
