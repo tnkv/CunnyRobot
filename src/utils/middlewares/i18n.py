@@ -4,7 +4,7 @@ from abc import ABC
 from typing import Optional, cast
 
 from aiogram.enums import ChatType
-from aiogram.types import TelegramObject, User
+from aiogram.types import TelegramObject, User, Chat
 from aiogram_i18n.managers import BaseManager
 
 from src.utils import ChatInfo
@@ -16,11 +16,17 @@ class LocaleManager(BaseManager, ABC):
             event: TelegramObject,
             event_from_user: Optional[User] = None,
             chat_info: Optional[ChatInfo] = None) -> str:
-        if not (event.message or event.callback_query):
+        if not (event.message or event.callback_query or event.chat_member):
             return cast(str, self.default_locale)
 
-        chat_type = event.message.chat.type if event.message else event.callback_query.message.chat.type
-        if chat_type == ChatType.PRIVATE:
+        if event.message:
+            chat_obj: Chat = event.message.chat
+        elif event.callback_query:
+            chat_obj: Chat = event.callback_query.message.chat
+        else:
+            chat_obj: Chat = event.chat_member.chat
+
+        if chat_obj.type == ChatType.PRIVATE:
             if event_from_user:
                 return event_from_user.language_code or cast(str, self.default_locale)
 
