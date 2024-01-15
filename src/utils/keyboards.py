@@ -10,7 +10,7 @@ from src.utils.callback_factory import CaptchaCallbackFactory, DelwarnCallbackFa
 def cancel_tribunal_keyboard(i18n: I18nContext, time: int) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.button(
-        text=i18n.keyboards.tribunal.timbebutton(time=time),
+        text=i18n.keyboards.tribunal.timebutton(time=time),
         callback_data='cancel_tribunal'
     )
 
