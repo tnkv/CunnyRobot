@@ -24,7 +24,7 @@ async def command_checkwarns(message: Message, session: AsyncSession, i18n: I18n
 
         return await message.reply(display_warns(warns, i18n, name.get()))
 
-    is_initiator_admin = await utils.is_admin(message.from_user.id, message)
+    is_initiator_admin = await utils.is_admin(message.from_user.id, message.chat)
     if not is_initiator_admin:
         return await message.reply(text=i18n.get('common-need_admin_rights'))
 

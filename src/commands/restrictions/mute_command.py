@@ -10,7 +10,7 @@ router = Router()
 
 @router.message(Command(commands=['mute', 'm']), filters.AdminFilter(), filters.NeedReplyFilter())
 async def command_mute(message: Message, i18n: I18nContext) -> Message | None:
-    if await utils.is_admin(message.reply_to_message.from_user.id, message):
+    if await utils.is_admin(message.reply_to_message.from_user.id, message.chat):
         return await message.reply(i18n.get('command-mute-immune_user'))
 
     msg = message.text.split(' ')

@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from src.utils import database
 from src.utils import ChatInfo
 
+
 class DbSessionMiddleware(BaseMiddleware):
     def __init__(self, session_pool: async_sessionmaker):
         super().__init__()
@@ -21,6 +22,7 @@ class DbSessionMiddleware(BaseMiddleware):
     ) -> Any:
         async with self.session_pool() as session:
             data["session"] = session
+            data["session_pool"] = self.session_pool
             if not (event.message or event.callback_query or event.chat_member):
                 return await handler(event, data)
             data["chat_info"] = None

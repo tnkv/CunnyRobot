@@ -8,7 +8,7 @@ from src.utils import utils
 
 class AdminFilter(BaseFilter):
     async def __call__(self, message: Message, i18n: I18nContext) -> bool:
-        if not await utils.is_admin(message.from_user.id, message):
+        if not await utils.is_admin(message.from_user.id, message.chat):
             await message.reply(i18n.get('common-need_admin_rights'))
             return False
 
@@ -20,7 +20,7 @@ class CallbackAdminFilter(BaseFilter):
         self.need_notify = need_notify
 
     async def __call__(self, callback: CallbackQuery, i18n: I18nContext) -> bool:
-        if await utils.is_admin(callback.from_user.id, callback.message):
+        if await utils.is_admin(callback.from_user.id, callback.message.chat):
             return True
 
         if self.need_notify:

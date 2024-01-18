@@ -27,7 +27,7 @@ async def command_warn(
         i18n: I18nContext) -> Message:
     if message.from_user.id == message.reply_to_message.from_user.id:
         return await message.reply(i18n.get('command-warn-cant_warn_self'))
-    if await utils.is_admin(message.reply_to_message.from_user.id, message):
+    if await utils.is_admin(message.reply_to_message.from_user.id, message.chat):
         return await message.reply(i18n.get('command-warn-cant_warn_admin'))
 
     warn = Warns(TelegramChatID=message.chat.id,

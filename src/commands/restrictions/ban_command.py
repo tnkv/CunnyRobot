@@ -11,7 +11,7 @@ router = Router()
 @router.message(Command('ban'), filters.AdminFilter())
 async def command_ban(message: Message, i18n: I18nContext) -> Message | bool | None:
     if message.reply_to_message:
-        if await utils.is_admin(message.reply_to_message.from_user.id, message):
+        if await utils.is_admin(message.reply_to_message.from_user.id, message.chat):
             return await message.reply(i18n.get('command-ban-immune_user'))
 
         if message.reply_to_message.from_user.id == 136817688 and message.reply_to_message.sender_chat:
@@ -25,7 +25,7 @@ async def command_ban(message: Message, i18n: I18nContext) -> Message | bool | N
     if len(msg) < 2 or not msg[1].isdigit():
         return await message.reply(i18n.get('command-ban-need_telegram_id'))
     try:
-        if await utils.is_admin(int(msg[1]), message):
+        if await utils.is_admin(int(msg[1]), message.chat):
             return await message.reply(i18n.get('command-ban-immune_user'))
 
         await message.chat.ban(user_id=int(msg[1]))

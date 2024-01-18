@@ -2,7 +2,6 @@ import re
 from typing import Optional
 
 from aiogram import Router
-from aiogram.enums import ChatType
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
 from aiogram_i18n import I18nContext
@@ -23,6 +22,10 @@ class CommentsFilter(BaseFilter):
     async def __call__(self, message: Message, chat_info: Optional[ChatInfo]) -> bool:
         if chat_info is None:
             return False
+
+        if not chat_info.is_comments:
+            return False
+
         if message.left_chat_member and message.left_chat_member.id == message.bot.id:
             return False
 
@@ -31,10 +34,7 @@ class CommentsFilter(BaseFilter):
 
         is_service = message.content_type in service_message_types
 
-        if await utils.is_admin(message.from_user.id, message) and not is_service:
-            return False
-
-        if not chat_info.is_comments:
+        if await utils.is_admin(message.from_user.id, message.chat) and not is_service:
             return False
 
         return True
@@ -45,13 +45,13 @@ class CustomFilters(BaseFilter):
         if chat_info is None:
             return False
 
+        if not chat_info.filters_enabled:
+            return False
+
         if message.left_chat_member and message.left_chat_member.id == message.bot.id:
             return False
         
-        if await utils.is_admin(message.from_user.id, message):
-            return False
-
-        if not chat_info.filters_enabled:
+        if await utils.is_admin(message.from_user.id, message.chat):
             return False
 
         for filter_id, details in chat_info.filters_list.items():

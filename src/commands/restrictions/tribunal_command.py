@@ -6,7 +6,7 @@ from aiogram.enums import ChatMemberStatus
 from aiogram.filters import Command
 from aiogram.types import Message, ChatPermissions, CallbackQuery
 from aiogram_i18n import I18nContext
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from src.utils import keyboards, database, utils, ChatInfo, filters
 
@@ -18,6 +18,7 @@ router = Router()
 async def command_tribunal(
         message: Message,
         session: AsyncSession,
+        session_pool: async_sessionmaker,
         chat_info: ChatInfo,
         i18n: I18nContext) -> Message | None:
     if not message.reply_to_message:  # Проверка что ответ на сообщение
@@ -70,8 +71,9 @@ async def command_tribunal(
     while time() < end_time:
         timer += 5
         await asyncio.sleep(min(timer - time(), end_time - time()))
-        if ChatInfo(await database.get_chat_info(session, message.chat.id)).last_tribunal_end < time():
-            return  # Проверка что трибунал не был отменён администратором
+        async with session_pool() as temp_session:
+            if (await database.get_chat_info(temp_session, message.chat.id)).LastTribunalEnd < time():
+                return  # Проверка что трибунал не был отменён администратором
 
         await msg.edit_reply_markup(reply_markup=keyboards.cancel_tribunal_keyboard(i18n, end_time - int(time())))
 

@@ -1,14 +1,15 @@
 from time import time
 
 from aiogram.client.session import aiohttp
-from aiogram.utils.markdown import html_decoration
 from aiogram.enums import ChatMemberStatus
-from aiogram.types import Message, User
+from aiogram.types import User, Chat
+from aiogram.utils.markdown import html_decoration
 
 ANON_ADMIN_ID = 1087968824
 CAS_LINK = 'https://api.cas.chat/check?user_id={user_id}'
 ADMIN_STATUS = (ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR)
 TIME_COEFFICIENT = {'m': 60, 'h': 3600, 'd': 86400, 'w': 604800}
+
 
 class NameFormat:
     def __init__(self, user: User):
@@ -27,6 +28,7 @@ class NameFormat:
         return f'<a href="tg://user?id={self.user_id}">{html_decoration.quote(self.first_name)}</a>' if is_link \
             else f'{html_decoration.quote(self.first_name)}'
 
+
 # Проверка наличия пользователя в базе CAS
 async def is_cas_ban(TelegramUserID: int) -> bool:
     session = aiohttp.ClientSession()
@@ -37,14 +39,15 @@ async def is_cas_ban(TelegramUserID: int) -> bool:
     return answer.get('ok', False)
 
 
-async def is_admin(user_id: int, message: Message) -> bool:
+async def is_admin(user_id: int, chat: Chat) -> bool:
     if user_id == ANON_ADMIN_ID:
         return True
 
-    if (await message.chat.get_member(user_id=user_id)).status in ADMIN_STATUS:
+    if (await chat.get_member(user_id=user_id)).status in ADMIN_STATUS:
         return True
 
     return False
+
 
 def get_restriction_time(duration: str) -> int:
     unit = duration[-1]

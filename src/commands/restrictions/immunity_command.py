@@ -41,7 +41,7 @@ async def command_revoke_immune(
 # Проверка наличия иммунитета
 @router.message(Command(commands=['check']))
 async def command_check(message: Message, chat_info: ChatInfo, i18n: I18nContext) -> Message | None:
-    is_initiator_admin = await utils.is_admin(message.from_user.id, message)
+    is_initiator_admin = await utils.is_admin(message.from_user.id, message.chat)
 
     if not message.reply_to_message:
         immune_status = is_initiator_admin or message.from_user.id in chat_info.tribunal_immunity
@@ -51,7 +51,7 @@ async def command_check(message: Message, chat_info: ChatInfo, i18n: I18nContext
         await message.reply(i18n.get('common-need_admin_rights'))
         return
 
-    is_target_admin = await utils.is_admin(message.reply_to_message.from_user.id, message)
+    is_target_admin = await utils.is_admin(message.reply_to_message.from_user.id, message.chat)
     immune_status = is_target_admin or message.reply_to_message.from_user.id in chat_info.tribunal_immunity
 
     await message.reply(i18n.get('command-immunity-check', status=immune_status))

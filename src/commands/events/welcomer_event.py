@@ -32,6 +32,9 @@ async def event_new_chat(event: ChatMemberUpdated, session: AsyncSession, i18n: 
 # Приветствие нового участника
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=JOIN_TRANSITION))
 async def event_new_member(event: ChatMemberUpdated, chat_info: ChatInfo, i18n: I18nContext) -> None:
+    if await utils.is_admin(event.from_user.id, event.chat):
+        return
+    
     if await utils.is_cas_ban(event.from_user.id):
         await event.chat.ban(user_id=event.from_user.id)
 
