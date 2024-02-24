@@ -20,6 +20,7 @@ OS = f'{platform.system()} {platform.release()} ({platform.version()})'
 CPU = f'{psutil.cpu_count()} ({psutil.cpu_freq().max / 1000:.2f}GHz)'
 RAM_AMOUNT = f'{round(psutil.virtual_memory().total / (1024.0 ** 3), 1)} GB'
 
+
 @router.message(Command(commands=['status']), filters.SuperUserFilter())
 async def command_status(message: Message, session: AsyncSession) -> None:
     await message.reply(

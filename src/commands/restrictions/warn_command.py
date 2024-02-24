@@ -1,6 +1,6 @@
 from time import time
 
-import aiogram.exceptions
+from aiogram.exceptions import TelegramBadRequest
 from aiogram import Router
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message, ChatPermissions
@@ -62,7 +62,7 @@ async def command_warn(
                     warn_displa=check_warns.display_warns(all_warns, i18n)
                 )
             )
-        except aiogram.exceptions.TelegramBadRequest as e:
+        except TelegramBadRequest as e:
             return await message.answer(i18n.get('common-errors-cant_mute', exception=str(e)))
 
     await message.answer(

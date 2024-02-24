@@ -12,6 +12,10 @@ router = Router()
 @router.message(CommandStart())
 async def command_start(message: Message, i18n: I18nContext) -> Message:
     if message.chat.type == ChatType.PRIVATE:
-        return await message.answer(text=i18n.command.start(),
-                                    reply_markup=keyboards.add_to_chat_keyboard(i18n, (await message.bot.get_me()).username))
-
+        return await message.answer(
+            text=i18n.command.start(),
+            reply_markup=keyboards.add_to_chat_keyboard(
+                i18n,
+                (await message.bot.get_me()).username
+            )
+        )
