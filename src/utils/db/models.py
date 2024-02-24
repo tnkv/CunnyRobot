@@ -6,6 +6,7 @@ from sqlalchemy.orm import relationship
 import config
 from src.utils.db.base import Base
 
+
 class TribunalBot(Base):
     __tablename__ = 'TribunalBot'
 
@@ -13,6 +14,7 @@ class TribunalBot(Base):
     LastTribunalEnd = Column(Integer, default=0)
     ChatSettings = Column(Text, default=json.dumps(config.DEFAULT_CHAT_SETTINGS))
     warns = relationship('Warns', back_populates='TelegramChat')
+
 
 class Warns(Base):
     __tablename__ = 'Warns'
@@ -23,4 +25,3 @@ class Warns(Base):
     MessageID = Column(Integer, default=0)
     IsActive = Column(Boolean, default=True)
     TelegramChat = relationship('TribunalBot', back_populates='warns')
-

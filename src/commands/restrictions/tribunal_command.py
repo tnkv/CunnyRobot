@@ -3,6 +3,7 @@ from time import time
 
 from aiogram import Router, F
 from aiogram.enums import ChatMemberStatus
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
 from aiogram.types import Message, ChatPermissions, CallbackQuery
 from aiogram_i18n import I18nContext
@@ -14,7 +15,7 @@ router = Router()
 
 
 # Трибунал
-@router.message(Command('tribunal'))
+@router.message(Command('tribunal', 'votemute'))
 async def command_tribunal(
         message: Message,
         session: AsyncSession,
@@ -74,8 +75,10 @@ async def command_tribunal(
         async with session_pool() as temp_session:
             if (await database.get_chat_info(temp_session, message.chat.id)).LastTribunalEnd < time():
                 return  # Проверка что трибунал не был отменён администратором
-
-        await msg.edit_reply_markup(reply_markup=keyboards.cancel_tribunal_keyboard(i18n, end_time - int(time())))
+        try:
+            await msg.edit_reply_markup(reply_markup=keyboards.cancel_tribunal_keyboard(i18n, end_time - int(time())))
+        except TelegramBadRequest:
+            continue
 
     poll = await message.bot.stop_poll(
         chat_id=message.chat.id,

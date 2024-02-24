@@ -2,6 +2,7 @@ import asyncio
 import logging
 
 from aiogram import Bot, Dispatcher
+from aiogram.client.default import DefaultBotProperties
 from aiogram_i18n import I18nMiddleware
 from aiogram_i18n.cores import FluentRuntimeCore
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
@@ -11,7 +12,12 @@ from src.commands import router
 from src.utils import db, middlewares, enums
 
 dp = Dispatcher()
-bot = Bot(token=config.BOT_TOKEN, parse_mode='HTML')
+bot = Bot(
+    token=config.BOT_TOKEN,
+    default=DefaultBotProperties(
+        parse_mode="HTML"
+    )
+)
 
 
 async def main() -> None:

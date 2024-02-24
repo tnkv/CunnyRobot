@@ -9,12 +9,14 @@ class CaptchaCallbackFactory(CallbackData, prefix="captcha"):
     user: int
     chat: int
 
+
 class DelwarnCallbackFactory(CallbackData, prefix="delwarn"):
     """
     Обработка удаления конкретного варна, по айди
     """
     warn_id: int
     user_id: int
+
 
 class SetLangFactory(CallbackData, prefix="setlang"):
     """

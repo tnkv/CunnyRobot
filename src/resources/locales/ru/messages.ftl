@@ -49,8 +49,8 @@ command-is_cas_ban =
     <i>Powered by https://cas.chat/api</i>
 
 command-mute-immune_user = Этого пользователя замутить нельзя.
-command-mute-mute = Пользователь { $name } замучен.
-command-mute-tempmute = Пользователь { $name } замучен на { $period }.
+command-mute-mute = Пользователь { $name } замьючен.
+command-mute-tempmute = Пользователь { $name } замьючен на { $period }.
 
 command-unmute-need_telegram_id = Для снятия ограничений необходимо ответить на сообщение или написать Telegram ID через пробел.
 command-unmute-unmute = С пользователя { $user } сняты ограничения.
@@ -123,7 +123,7 @@ command-tribunal-poll_option-no = Против
 command-tribunal-insufficient_votes =
     В голосовании за ссылку { $name } приняло слишком мало людей. Минимальное общее количество голосов для признания голосования легитимным - 3
 command-tribunal-insufficient_yesvotes =
-    Голосование за мут { $name } закончилось с { $mute_votes_percent }% голосов за, но для мута требуется хотя бы 66%, пользователь не будет замучен.
+    Голосование за мут { $name } закончилось с { $mute_votes_percent }% голосов за, но для мута требуется хотя бы 66%, пользователь не будет замьючен.
 command-tribunal-another_restriction = Трибунал завершён, но во время ожидания пользователь получил другое наказание.
 command-tribunal-finish = Голосование за мут { $name } закончилось с { $mute_votes_percent }% голосов за, пользователь отправляется в мут на { $mute_period } минут.
 
