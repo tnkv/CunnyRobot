@@ -214,7 +214,7 @@ command-configuration-filters-confirmation =
 }
 command-configuration-filters-added =
     The <code>{ $regex }</code> filter has been added!
-    Messages from users with administrator privileges will not be deleted.
+    Messages from users with administrator privileges will not be deleted. All messages go to lowercase before being checked.
 command-configuration-filters-remove =
     To remove a filter, write its ID
 

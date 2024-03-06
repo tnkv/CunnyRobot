@@ -214,7 +214,7 @@ command-configuration-filters-confirmation =
 }
 command-configuration-filters-added =
     Фильтр <code>{ $regex }</code> добавлен!
-    Сообщения от пользователей с правами администратора удаляться не будут.
+    Сообщения от пользователей с правами администратора удаляться не будут. Все сообщения перед проверкой переходят в lowercase.
 command-configuration-filters-remove =
     Для удаления фильтра, напишите его ID
 

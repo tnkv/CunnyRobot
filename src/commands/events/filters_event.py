@@ -56,7 +56,7 @@ class CustomFilters(BaseFilter):
 
         for filter_id, details in chat_info.filters_list.items():
             pattern = re.compile(details.get('regex'))
-            if pattern.fullmatch(message.text) if details.get('full_match', False) else pattern.search(message.text):
+            if pattern.fullmatch(message.text.lower()) if details.get('full_match', False) else pattern.search(message.text.lower()):
                 return True
 
         return False
