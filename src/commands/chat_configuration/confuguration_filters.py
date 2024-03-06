@@ -1,6 +1,7 @@
 from aiogram import Router, F
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import CallbackQuery
+from aiogram.utils.markdown import html_decoration
 from aiogram_i18n import I18nContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,8 +9,10 @@ from src.commands.chat_configuration.filers_modify import add_filter, remove_fil
 from src.utils import database, keyboards, ChatInfo, filters, utils
 
 router = Router()
-router.include_routers(add_filter.router,
-                       remove_filter.router)
+router.include_routers(
+    add_filter.router,
+    remove_filter.router
+)
 
 
 @router.callback_query(F.data == 'settings_filters_btn', filters.CallbackAdminFilter())
@@ -30,7 +33,7 @@ async def callback_filters_list(callback: CallbackQuery, i18n: I18nContext, chat
     for filter_id, filter_details in chat_info.filters_list.items():
         message += "\n\n" + i18n.command.configuration.filters.list.filter(
             filter_id=filter_id,
-            filter_regex=filter_details.get("regex", "Broken"),
+            filter_regex=html_decoration.quote(filter_details.get("regex", "Broken")),
             full_match=filter_details.get("full_match", False)
         )
 

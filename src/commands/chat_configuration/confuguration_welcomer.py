@@ -66,8 +66,13 @@ async def set_welcome_text(message: Message, i18n: I18nContext, state: FSMContex
     await state.update_data(new_text=message.html_text)
     await message.reply(i18n.command.configuration.welcome.setwelcome.preview())
     name = utils.NameFormat(message.from_user)
-    welcome_message_text = message.html_text.format(
-        user=name.get()) if '{user}' in message.html_text else message.html_text
+    welcome_message_text = (
+        message.html_text
+        .replace("{user}", name.get())
+        .replace("{user_nolink}", name.get(False))
+        .replace("{user_id}", str(message.from_user.id))
+        .replace("{chat_name}", message.chat.title or str(message.chat.id))
+    )
 
     await message.answer(welcome_message_text)
     await state.set_state(SetWelcomeText.confirm_welcome_text)
