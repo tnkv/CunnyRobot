@@ -23,7 +23,7 @@ DEFAULT_CHAT_SETTINGS = {
 }
 
 GROUPS_COMMANDS = {
-    "tribunal:": "botinfo-cmd-tribunal",
+    "tribunal": "botinfo-cmd-tribunal",
     "warns": "botinfo-cmd-warns",
     "check": "botinfo-cmd-check",
     "is_cas_ban": "botinfo-cmd-casban"
