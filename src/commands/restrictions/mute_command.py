@@ -35,7 +35,7 @@ async def command_mute(message: Message, i18n: I18nContext) -> Message | None:
 
     await message.answer(
         i18n.get(
-            'command-mute-mute',
+            'command-mute-tempmute',
             name=target_name.get(),
             period=msg[1]
         )

@@ -3,6 +3,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery
+from aiogram.utils.text_decorations import html_decoration
 from aiogram_i18n import I18nContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -47,7 +48,9 @@ async def filterremove_waitid(message: Message, chat_info: ChatInfo, i18n: I18nC
     await message.answer(
         i18n.command.configuration.filters.remove.confirmation(
             filter_id=message.text,
-            regex=selected_filter.get("regex"),
+            regex=html_decoration.quote(
+                selected_filter.get("regex")
+            ),
             full_match=selected_filter.get("full_match", False)
         ),
         reply_markup=keyboards.confirm_keyboard(i18n)

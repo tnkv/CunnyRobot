@@ -34,7 +34,7 @@ async def event_new_chat(event: ChatMemberUpdated, session: AsyncSession, i18n: 
 async def event_new_member(event: ChatMemberUpdated, chat_info: ChatInfo, i18n: I18nContext) -> None:
     if await utils.is_admin(event.from_user.id, event.chat):
         return
-    
+
     if await utils.is_cas_ban(event.from_user.id):
         await event.chat.ban(user_id=event.from_user.id)
 
@@ -81,9 +81,13 @@ async def event_new_member(event: ChatMemberUpdated, chat_info: ChatInfo, i18n: 
             until_date=0,
             permissions=ChatPermissions(can_send_messages=False)
         )
-        welcome_message_text = chat_info.welcome_message_text.format(
-            user=name.get()) if '{user}' in chat_info.welcome_message_text else chat_info.welcome_message_text
-
+        welcome_message_text = (
+            chat_info.welcome_message_text
+            .replace("{user}", name.get())
+            .replace("{user_nolink}", name.get(False))
+            .replace("{user_id}", str(event.from_user.id))
+            .replace("{chat_name}", event.chat.title or str(event.chat.id))
+        )
         await event.bot.send_message(
             chat_id=event.chat.id,
             text=welcome_message_text,

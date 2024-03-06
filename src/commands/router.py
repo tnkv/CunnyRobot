@@ -3,7 +3,7 @@ from aiogram import Router
 from src.commands.restrictions import ban_command, mute_command, um_command, tribunal_command, immunity_command, warn_command
 from src.commands.chat_configuration import configuration, confuguration_welcomer, confuguration_filters, configuration_members
 from src.commands.events import welcomer_event, filters_event, callback
-from src.commands.utility import cas_ban_check, status_command, start_command
+from src.commands.utility import cas_ban_check, status_command, start_command, set_bot_info
 from src.commands.fun import moscow
 
 restrictions_commands = Router()
@@ -35,7 +35,8 @@ utility_commands = Router()
 utility_commands.include_routers(
     cas_ban_check.router,
     status_command.router,
-    start_command.router
+    start_command.router,
+    set_bot_info.router
 )
 
 fun_commands = Router()

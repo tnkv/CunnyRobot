@@ -49,10 +49,17 @@ async def filteradd_waitregex(message: Message, i18n: I18nContext, state: FSMCon
         await state.update_data(regex=message.text)
         await state.set_state(AddFilter.filter_fullmatch)
         await message.reply(
-            text=i18n.command.configuration.filters.fullmatch(regex=html_decoration.quote(message.text)),
-            reply_markup=keyboards.confirm_keyboard(i18n))
+            text=i18n.command.configuration.filters.fullmatch(
+                regex=html_decoration.quote(message.text)
+            ),
+            reply_markup=keyboards.confirm_keyboard(i18n)
+        )
     except re.error:
-        await message.reply(i18n.command.configuration.filters.regex_error(regex=html_decoration.quote(message.text)))
+        await message.reply(
+            i18n.command.configuration.filters.regex_error(
+                regex=html_decoration.quote(message.text)
+            )
+        )
 
 
 @router.callback_query(AddFilter.filter_fullmatch, F.data == 'confirm')
