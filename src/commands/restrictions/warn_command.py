@@ -59,7 +59,7 @@ async def command_warn(
                     name=target_name.get(),
                     warn_number=warn_count,
                     warn_number_limit=chat_info.warns_count_trigger,
-                    warn_displa=check_warns.display_warns(all_warns, i18n)
+                    warn_display=check_warns.display_warns(all_warns, i18n)
                 )
             )
         except TelegramBadRequest as e:
