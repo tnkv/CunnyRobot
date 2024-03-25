@@ -20,8 +20,6 @@ async def command_is_cas_ban(message: Message, i18n: I18nContext) -> None:
         await message.reply(i18n.cas.is_cas_ban.incorrect_telegram_id())
         return
 
-    await message.reply(i18n.test.number(count=int(msg[1])))
-
     cas_ban_status = await utils.is_cas_ban(int(msg[1]))
 
     await message.reply(
