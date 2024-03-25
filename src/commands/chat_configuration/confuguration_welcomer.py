@@ -126,7 +126,15 @@ async def set_welcome_time(message: Message, session: AsyncSession, state: FSMCo
         return await message.reply(html_decoration.quote(i18n.command.configuration.welcome.settime.limit()))
 
     chat_info.set_welcome_timeout(seconds)
+    print(chat_info.welcome_message_timeout)
     await database.set_chat_info(session, chat_info.export())
 
     await state.clear()
-    await message.reply(i18n.command.configuration.welcome.settime.set(seconds=seconds))
+    await message.reply(
+        i18n.command.configuration.welcome.settime.set(
+            seconds=i18n.common.format.seconds.wait(
+                form=utils.inflect_with_num(seconds),
+                count=seconds
+            )
+        )
+    )

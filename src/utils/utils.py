@@ -53,3 +53,20 @@ def get_restriction_time(duration: str) -> int:
     unit = duration[-1]
     value = int(duration[:-1]) if duration[:-1].isdigit() else 0
     return int(time()) + value * TIME_COEFFICIENT.get(unit, 0) + 1
+
+
+def inflect_with_num(number) -> int:
+    # 0 - 1 секунда
+    # 1 - 10 секунд
+    # 2 - 2 секунды
+    units = number % 10
+    tens = number % 100 - units
+
+    if tens == 10 or units >= 5 or units == 0:
+        needed_form = 1
+    elif units > 1:
+        needed_form = 2
+    else:
+        needed_form = 0
+
+    return needed_form

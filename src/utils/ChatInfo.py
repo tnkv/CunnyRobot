@@ -53,9 +53,11 @@ class ChatInfo:
             'chat_language': self.chat_language
         }
 
-        return TribunalBot(TelegramChatID=self.chat_id,
-                           LastTribunalEnd=self.last_tribunal_end,
-                           ChatSettings=json.dumps(settings))
+        return TribunalBot(
+            TelegramChatID=self.chat_id,
+            LastTribunalEnd=self.last_tribunal_end,
+            ChatSettings=json.dumps(settings)
+        )
 
     def switch_comments(self) -> None:
         self.is_comments = not self.is_comments
@@ -92,7 +94,8 @@ class ChatInfo:
     def add_filter(self, regex: str, full_match: bool = False):
         self.filters_list[uuid.uuid4().hex] = {
             'regex': regex,
-            'full_match': full_match}
+            'full_match': full_match
+        }
 
     def remove_filter(self, filter_id: str):
         self.filters_list.pop(filter_id)

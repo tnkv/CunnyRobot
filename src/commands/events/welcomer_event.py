@@ -37,6 +37,7 @@ async def event_new_member(event: ChatMemberUpdated, chat_info: ChatInfo, i18n: 
 
     if await utils.is_cas_ban(event.from_user.id):
         await event.chat.ban(user_id=event.from_user.id)
+        return
 
     if chat_info.is_comments:
         await event.chat.ban(user_id=event.from_user.id)
@@ -118,8 +119,14 @@ async def callback_captcha(callback: CallbackQuery, callback_data: CaptchaCallba
 
     if date_now < date:
         await callback.answer(
-            text=i18n.get('callback-button_become_active_in', seconds=date - date_now),
-            show_alert=True)
+            text=i18n.callback.button_become_active_in(
+                seconds=i18n.common.format.seconds.wait(
+                    form=utils.inflect_with_num(date-date_now),
+                    count=date-date_now
+                )
+            ),
+            show_alert=True
+        )
         return
 
     await callback.answer()
