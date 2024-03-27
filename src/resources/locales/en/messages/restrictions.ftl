@@ -1,6 +1,14 @@
 command-mute-immune_user = This user cannot be muted.
 command-mute-mute = { $name } muted.
+command-mute-mute-reason =
+    { $name } muted.
+
+    Reason: { $reason }
 command-mute-tempmute = { $name } muted for { $period }.
+command-mute-tempmute-reason =
+    { $name } muted for { $period }.
+
+    Reason: { $reason }
 
 command-unmute-need_telegram_id = To remove restrictions, you need to reply to the message or write Telegram ID.
 command-unmute-unmute = The user { $user } has been unrestricted.
@@ -12,6 +20,7 @@ command-ban-ban_id = <code>{ $user }</code> banned.
 
 command-warn-cant_warn_self = You can't warn yourself.
 command-warn-cant_warn_admin = You can't warn administrator.
+command-warn-cant_warn_anon = You can't warn an anonymous user.
 command-warn-warn =
     Administrator { $admin_name } warned { $name }
 

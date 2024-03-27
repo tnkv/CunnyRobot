@@ -1,5 +1,3 @@
-from time import time
-
 from aiogram.client.session import aiohttp
 from aiogram.enums import ChatMemberStatus
 from aiogram.types import User, Chat
@@ -15,24 +13,23 @@ class NameFormat:
     def __init__(self, user: User):
         self.user_id = user.id
         self.username = user.username
-        self.first_name = user.first_name
-        self.last_name = user.last_name
+        self.full_name = user.full_name
 
     def get(self, is_link=True) -> str:
-        if self.username is not None:
-            return f'<a href="tg://user?id={self.user_id}">@{self.username}</a>' if is_link \
+        if self.username:
+            return f'<a href="tg://user?id={self.user_id}">@{self.username}</a>' \
+                if is_link and self.user_id > 0 \
                 else f'@{self.username}'
-        elif self.last_name is not None:
-            return f'<a href="tg://user?id={self.user_id}">{html_decoration.quote(self.first_name)} {html_decoration.quote(self.last_name)}</a>' if is_link \
-                else f'{html_decoration.quote(self.first_name)} {html_decoration.quote(self.last_name)}'
-        return f'<a href="tg://user?id={self.user_id}">{html_decoration.quote(self.first_name)}</a>' if is_link \
-            else f'{html_decoration.quote(self.first_name)}'
+
+        return f'<a href="tg://user?id={self.user_id}">{html_decoration.quote(self.full_name)}</a>' \
+            if is_link and self.user_id > 0 \
+            else f'{html_decoration.quote(self.full_name)}'
 
 
 # Проверка наличия пользователя в базе CAS
-async def is_cas_ban(TelegramUserID: int) -> bool:
+async def is_cas_ban(telegram_user_id: int) -> bool:
     session = aiohttp.ClientSession()
-    async with session.get(CAS_LINK.format(user_id=TelegramUserID)) as resp:
+    async with session.get(CAS_LINK.format(user_id=telegram_user_id)) as resp:
         answer = await resp.json(content_type='application/json')
         await session.close()
 
@@ -52,7 +49,7 @@ async def is_admin(user_id: int, chat: Chat) -> bool:
 def get_restriction_time(duration: str) -> int:
     unit = duration[-1]
     value = int(duration[:-1]) if duration[:-1].isdigit() else 0
-    return int(time()) + value * TIME_COEFFICIENT.get(unit, 0) + 1
+    return value * TIME_COEFFICIENT.get(unit, 0)
 
 
 def inflect_with_num(number) -> int:

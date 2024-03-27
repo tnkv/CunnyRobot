@@ -45,7 +45,10 @@ async def command_delwarn(message: Message, session: AsyncSession, i18n: I18nCon
     warn.IsActive = False
     await database.set_chat_info(session, warn)
 
-    link_to_warn = f'<a href="https://t.me/c/{str(warn.TelegramChatID)[4:]}/{warn.MessageID}">{warn.Reason if warn.Reason else i18n.get("command-warn-display-noreason")}</a>'
+    link_to_warn = (
+        f'<a href="https://t.me/c/{str(warn.TelegramChatID)[4:]}/{warn.MessageID}">'
+        f'{warn.Reason if warn.Reason else i18n.get("command-warn-display-noreason")}</a>'
+    )
 
     await message.reply(
         i18n.get(

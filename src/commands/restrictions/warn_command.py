@@ -29,10 +29,14 @@ async def command_warn(
         return await message.reply(i18n.get('command-warn-cant_warn_self'))
     if await utils.is_admin(message.reply_to_message.from_user.id, message.chat):
         return await message.reply(i18n.get('command-warn-cant_warn_admin'))
+    if message.reply_to_message.sender_chat:
+        return await message.reply(i18n.get('command-warn-cant_warn_anon'))
 
-    warn = Warns(TelegramChatID=message.chat.id,
-                 TelegramUserID=message.reply_to_message.from_user.id,
-                 MessageID=message.message_id)
+    warn = Warns(
+        TelegramChatID=message.chat.id,
+        TelegramUserID=message.reply_to_message.from_user.id,
+        MessageID=message.message_id
+    )
 
     if command.args is not None:
         warn.Reason = command.args
@@ -53,19 +57,22 @@ async def command_warn(
                     can_send_messages=False
                 )
             )
-            return await message.answer(
+            return await message.bot.send_message(
+                chat_id=message.chat.id,
                 text=i18n.get(
                     'command-warn-warn_limit',
                     name=target_name.get(),
                     warn_number=warn_count,
                     warn_number_limit=chat_info.warns_count_trigger,
                     warn_display=check_warns.display_warns(all_warns, i18n)
-                )
+                ),
+                reply_to_message_id=message.reply_to_message.message_id
             )
         except TelegramBadRequest as e:
             return await message.answer(i18n.get('common-errors-cant_mute', exception=str(e)))
 
-    await message.answer(
+    await message.bot.send_message(
+        chat_id=message.chat.id,
         text=i18n.get(
             'command-warn-warn',
             admin_name=admin_name.get(),
@@ -74,6 +81,7 @@ async def command_warn(
             warn_number_limit=chat_info.warns_count_trigger,
             warn_reason=warn.Reason
         ),
+        reply_to_message_id=message.reply_to_message.message_id,
         reply_markup=keyboards.delwarn_keyboard(
             i18n,
             warn.WarnID,

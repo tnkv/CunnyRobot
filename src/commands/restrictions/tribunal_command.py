@@ -104,8 +104,8 @@ async def command_tribunal(
             )
         )
 
-    tribunalizable = await message.chat.get_member(
-        user_id=message.reply_to_message.from_user.id)  # Обновляю инфу окончательно, а то пока был трибунал его могли замутить
+    # Обновляю инфу окончательно, а то пока был трибунал его могли замутить
+    tribunalizable = await message.chat.get_member(user_id=message.reply_to_message.from_user.id)
     if tribunalizable.status in (ChatMemberStatus.RESTRICTED,) and not tribunalizable.can_send_messages:
         await message.reply(i18n.get('command-tribunal-another_restriction'))
         return
