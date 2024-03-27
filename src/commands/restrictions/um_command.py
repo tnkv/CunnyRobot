@@ -14,7 +14,7 @@ async def command_um(message: Message, i18n: I18nContext) -> bool | Message:
         if message.reply_to_message.sender_chat:
             return await message.chat.unban_sender_chat(message.reply_to_message.sender_chat.id)
 
-        telegram_id = message.reply_to_message.sender_chat.id
+        telegram_id = message.reply_to_message.from_user.id
     else:
         msg = message.text.split(' ')
         if len(msg) >= 2 and msg[1].isdigit():
