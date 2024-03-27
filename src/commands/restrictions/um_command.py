@@ -11,20 +11,20 @@ router = Router()
 @router.message(Command(commands=['unmute', 'um', 'unban']), filters.AdminFilter())
 async def command_um(message: Message, i18n: I18nContext) -> bool | Message:
     if message.reply_to_message:
-        if message.from_user.id == 136817688 and message.reply_to_message.sender_chat:
+        if message.reply_to_message.sender_chat:
             return await message.chat.unban_sender_chat(message.reply_to_message.sender_chat.id)
 
-        TelegramID = message.reply_to_message.from_user.id
+        telegram_id = message.reply_to_message.from_user.id
     else:
         msg = message.text.split(' ')
         if len(msg) >= 2 and msg[1].isdigit():
-            TelegramID = int(msg[1])
+            telegram_id = int(msg[1])
         else:
             return await message.reply(i18n.get('command-unmute-need_telegram_id'))
 
     try:
         await message.chat.restrict(
-            user_id=TelegramID,
+            user_id=telegram_id,
             until_date=0,
             permissions=ChatPermissions(
                 can_send_messages=True,
@@ -43,7 +43,7 @@ async def command_um(message: Message, i18n: I18nContext) -> bool | Message:
                 can_add_web_page_previews=True
             )
         )
-        await message.reply(i18n.get('command-unmute-unmute', user=TelegramID))
+        await message.reply(i18n.get('command-unmute-unmute', user=telegram_id))
 
     except Exception as e:
         await message.reply(i18n.get('common-errors-cant_unmute', exception=str(e)))

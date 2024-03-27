@@ -50,16 +50,17 @@ class CustomFilters(BaseFilter):
 
         if message.left_chat_member and message.left_chat_member.id == message.bot.id:
             return False
-        
+
         if await utils.is_admin(message.from_user.id, message.chat):
             return False
-            
+
         if not message.text:
             return False
-            
+
         for filter_id, details in chat_info.filters_list.items():
             pattern = re.compile(details.get('regex'))
-            if pattern.fullmatch(message.text.lower()) if details.get('full_match', False) else pattern.search(message.text.lower()):
+            if pattern.fullmatch(message.text.lower()) if details.get('full_match', False) \
+                    else pattern.search(message.text.lower()):
                 return True
 
         return False
