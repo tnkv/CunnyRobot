@@ -28,7 +28,7 @@ async def command_checkwarns(message: Message, session: AsyncSession, i18n: I18n
     if not is_initiator_admin:
         return await message.reply(text=i18n.get('common-need_admin_rights'))
 
-    target_name = utils.NameFormat(message.reply_to_message.from_user)
+    target_name = utils.NameFormat(message.reply_to_message.sender_chat or message.reply_to_message.from_user)
     warns = await database.get_warns(
         session,
         message.chat.id,
@@ -46,7 +46,10 @@ def display_warns(warns: list, i18n: I18nContext, user: str = None):
     counter = 1
 
     for warn in warns:
-        link_to_warn = f'<a href="https://t.me/c/{str(warn.TelegramChatID)[4:]}/{warn.MessageID}">{warn.Reason if warn.Reason else i18n.get("command-warn-display-noreason")}</a>'
+        link_to_warn = (
+            f'<a href="https://t.me/c/{str(warn.TelegramChatID)[4:]}/{warn.MessageID}">'
+            f'{warn.Reason if warn.Reason else i18n.get("command-warn-display-noreason")}</a>'
+        )
         display += f'<b>{counter})</b> {link_to_warn}\n'
         counter += 1
 
