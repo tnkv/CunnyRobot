@@ -17,3 +17,6 @@ cas-status = { $status ->
     [0] Not banned
     *[other] Banned
     }
+
+cas-autoban = The user who entered the chat was detected in the CAS database and was banned.
+    The welcome message has been deleted.

@@ -1,4 +1,4 @@
-from aiogram.client.session import aiohttp
+import aiohttp
 from aiogram.enums import ChatMemberStatus
 from aiogram.types import User, Chat
 from aiogram.utils.markdown import html_decoration
@@ -15,7 +15,8 @@ class NameFormat:
         self.username = user.username
         self.full_name = user.full_name
 
-    def get(self, is_link=True) -> str:
+
+    def get(self, is_link: bool = True) -> str:
         if self.username:
             return f'<a href="tg://user?id={self.user_id}">@{self.username}</a>' \
                 if is_link and self.user_id > 0 \
@@ -30,7 +31,10 @@ class NameFormat:
 async def is_cas_ban(telegram_user_id: int) -> bool:
     session = aiohttp.ClientSession()
     async with session.get(CAS_LINK.format(user_id=telegram_user_id)) as resp:
-        answer = await resp.json(content_type='application/json')
+        try:
+            answer = await resp.json(content_type='application/json')
+        except aiohttp.ContentTypeError:
+            return False
         await session.close()
 
     return answer.get('ok', False)

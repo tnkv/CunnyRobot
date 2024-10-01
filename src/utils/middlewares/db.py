@@ -36,6 +36,10 @@ class DbSessionMiddleware(BaseMiddleware):
 
             if chat_obj.type != ChatType.PRIVATE:
                 chat_in_db = await database.get_chat_info(session, chat_obj.id)
+
+                if chat_in_db is None:
+                    chat_in_db = await database.add_chat(session, chat_obj.id)
+
                 data["chat_info"] = ChatInfo(chat_in_db)
 
             return await handler(event, data)

@@ -35,10 +35,6 @@ async def event_new_member(event: ChatMemberUpdated, chat_info: ChatInfo, i18n: 
     if await utils.is_admin(event.from_user.id, event.chat):
         return
 
-    if await utils.is_cas_ban(event.from_user.id):
-        await event.chat.ban(user_id=event.from_user.id)
-        return
-
     if chat_info.is_comments:
         await event.chat.ban(user_id=event.from_user.id)
         await event.chat.restrict(
@@ -89,7 +85,7 @@ async def event_new_member(event: ChatMemberUpdated, chat_info: ChatInfo, i18n: 
             .replace("{user_id}", str(event.from_user.id))
             .replace("{chat_name}", event.chat.title or str(event.chat.id))
         )
-        await event.bot.send_message(
+        msg = await event.bot.send_message(
             chat_id=event.chat.id,
             text=welcome_message_text,
             reply_markup=keyboards.captcha_keyboard(
@@ -100,10 +96,17 @@ async def event_new_member(event: ChatMemberUpdated, chat_info: ChatInfo, i18n: 
             disable_web_page_preview=True
         )
     except Exception as e:
-        await event.bot.send_message(
+        msg = await event.bot.send_message(
             chat_id=event.chat.id,
             text=i18n.get('common-errors-cant_mute', exception=str(e))
         )
+
+    if await utils.is_cas_ban(event.from_user.id):
+        await event.chat.ban(user_id=event.from_user.id)
+        await msg.edit_text(
+            text=i18n.cas.autoban()
+        )
+
 
 
 # Обработка кнопки в капче

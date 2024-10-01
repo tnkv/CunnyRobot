@@ -25,7 +25,7 @@ async def command_tribunal(
     if not message.reply_to_message:  # Проверка что ответ на сообщение
         return await message.reply(i18n.get('command-tribunal-need_reply'))
 
-    if message.from_user.id == message.reply_to_message.from_user.id:  # Проверка что не ответ на свое сообщение
+    if message.from_user.id == message.reply_to_message.from_user.id:  # Проверка, что не ответ на свое сообщение
         return await message.reply(i18n.get('command-tribunal-cant_self'))
 
     target_id = message.reply_to_message.from_user.id
@@ -33,7 +33,7 @@ async def command_tribunal(
     name = utils.NameFormat(message.reply_to_message.from_user)
 
     if (target.status in (ChatMemberStatus.CREATOR, ChatMemberStatus.ADMINISTRATOR)
-            or target_id in chat_info.tribunal_immunity):  # Проверка что у пользователя нет иммунитета
+            or target_id in chat_info.tribunal_immunity):  # Проверка, что у пользователя нет иммунитета
         return await message.reply(i18n.get('command-tribunal-user_immune'))
 
     if target.status in (ChatMemberStatus.RESTRICTED,) and not target.can_send_messages:  # Вдруг юзер уже в муте/бане
@@ -42,14 +42,26 @@ async def command_tribunal(
     tribunal_timeout = chat_info.last_tribunal_end
     current_time = int(time())
 
-    if tribunal_timeout >= current_time:  # Проверка что таймаут прошел
+    if tribunal_timeout >= current_time:  # Проверка, что таймаут прошел
         if tribunal_timeout - 90 >= current_time:
             return await message.reply(
-                i18n.get('command-tribunal-timeout-active', time=str(tribunal_timeout - current_time))
+                i18n.get(
+                    'command-tribunal-timeout-active',
+                    seconds=i18n.common.format.seconds.wait(
+                        form=utils.inflect_with_num(tribunal_timeout-current_time),
+                        count=tribunal_timeout-current_time
+                    )
+                )
             )
 
         return await message.reply(
-            i18n.get('command-tribunal-timeout', time=str(tribunal_timeout - current_time))
+            i18n.get(
+                'command-tribunal-timeout',
+                seconds=i18n.common.format.seconds.wait(
+                    form=utils.inflect_with_num(tribunal_timeout - current_time),
+                    count=tribunal_timeout - current_time
+                )
+            )
         )
 
     end_time = current_time + 90
