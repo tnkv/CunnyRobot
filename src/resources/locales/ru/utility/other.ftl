@@ -2,7 +2,7 @@ callback-button_not_your = Эта кнопка не для тебя.
 callback-button_become_active_in = Кнопка заработает через { $seconds }.
 
 events-welcomer-newchat-noadmin =
-    Привет. Для того что бы я мог управлять этим чатом мне необходимы права администратора.
+    Привет. Для того, чтобы я мог управлять этим чатом, мне необходимы права администратора.
 events-welcomer-newchat-admin =
     Бот добавлен в качестве админстратора этого чата.
 events-welcomer-captcha_not_solved =

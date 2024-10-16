@@ -35,4 +35,4 @@ command-tribunal-insufficient_votes =
 command-tribunal-insufficient_yesvotes =
     Voting for mute { $name } ended with { $mute_votes_percent }% in favor, but at least 66% is required for mute, the user will not be muted.
 command-tribunal-another_restriction = Voting ended, but the user received a different punishment while waiting.
-command-tribunal-finish = Voting for mute { $name } ended with { $mute_votes_percent }% in favor, user is sent to mut for { $mute_period } minutes.
+command-tribunal-finish = Voting for mute { $name } ended with { $mute_votes_percent }% in favor, user is sent to mute for { $mute_period } minutes.

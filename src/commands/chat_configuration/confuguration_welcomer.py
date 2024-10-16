@@ -1,3 +1,5 @@
+from time import time
+
 from aiogram import Router, F
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
@@ -69,9 +71,10 @@ async def set_welcome_text(message: Message, i18n: I18nContext, state: FSMContex
     welcome_message_text = (
         message.html_text
         .replace("{user}", name.get())
-        .replace("{user_nolink}", name.get(False))
+        .replace("{user_name}", html_decoration.quote(message.from_user.full_name))
         .replace("{user_id}", str(message.from_user.id))
-        .replace("{chat_name}", message.chat.title or str(message.chat.id))
+        .replace("{chat_title}", message.chat.title or str(message.chat.id))
+        .replace("{timestamp}", str(int(time())))
     )
 
     await message.answer(welcome_message_text)
@@ -126,7 +129,6 @@ async def set_welcome_time(message: Message, session: AsyncSession, state: FSMCo
         return await message.reply(html_decoration.quote(i18n.command.configuration.welcome.settime.limit()))
 
     chat_info.set_welcome_timeout(seconds)
-    print(chat_info.welcome_message_timeout)
     await database.set_chat_info(session, chat_info.export())
 
     await state.clear()

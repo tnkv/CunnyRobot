@@ -23,7 +23,7 @@ class DbSessionMiddleware(BaseMiddleware):
         async with self.session_pool() as session:
             data["session"] = session
             data["session_pool"] = self.session_pool
-            if not (event.message or event.callback_query or event.chat_member):
+            if not (event.message or event.callback_query or event.chat_member or event.my_chat_member):
                 return await handler(event, data)
             data["chat_info"] = None
 
@@ -31,8 +31,10 @@ class DbSessionMiddleware(BaseMiddleware):
                 chat_obj: Chat = event.message.chat
             elif event.callback_query:
                 chat_obj: Chat = event.callback_query.message.chat
-            else:
+            elif event.chat_member:
                 chat_obj: Chat = event.chat_member.chat
+            else:
+                chat_obj: Chat = event.my_chat_member.chat
 
             if chat_obj.type != ChatType.PRIVATE:
                 chat_in_db = await database.get_chat_info(session, chat_obj.id)

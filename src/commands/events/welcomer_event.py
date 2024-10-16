@@ -4,6 +4,7 @@ from aiogram import Router
 from aiogram.enums import ChatMemberStatus
 from aiogram.filters import ChatMemberUpdatedFilter, IS_NOT_MEMBER, ADMINISTRATOR, MEMBER, JOIN_TRANSITION
 from aiogram.types import ChatMemberUpdated, ChatPermissions, CallbackQuery
+from aiogram.utils.text_decorations import html_decoration
 from aiogram_i18n import I18nContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -32,10 +33,11 @@ async def event_new_chat(event: ChatMemberUpdated, session: AsyncSession, i18n: 
 # Приветствие нового участника
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=JOIN_TRANSITION))
 async def event_new_member(event: ChatMemberUpdated, chat_info: ChatInfo, i18n: I18nContext) -> None:
-    if await utils.is_admin(event.from_user.id, event.chat):
-        return
-
+    invited_by_admin = await utils.is_admin(event.from_user.id, event.chat)
     if chat_info.is_comments:
+        if invited_by_admin:
+            return
+
         await event.chat.ban(user_id=event.from_user.id)
         await event.chat.restrict(
             user_id=event.from_user.id,
@@ -61,9 +63,9 @@ async def event_new_member(event: ChatMemberUpdated, chat_info: ChatInfo, i18n: 
     if not chat_info.welcome_message:
         return
 
-    member = await event.chat.get_member(user_id=event.from_user.id)
+    member = await event.chat.get_member(user_id=event.new_chat_member.user.id)
 
-    name = utils.NameFormat(event.from_user)
+    name = utils.NameFormat(event.new_chat_member.user)
 
     if member.status in (ChatMemberStatus.RESTRICTED,) and not member.can_send_messages:
         await event.bot.send_message(
@@ -73,22 +75,24 @@ async def event_new_member(event: ChatMemberUpdated, chat_info: ChatInfo, i18n: 
         return
 
     try:
-        await event.chat.restrict(
-            user_id=event.from_user.id,
-            until_date=0,
-            permissions=ChatPermissions(can_send_messages=False)
-        )
+        if not invited_by_admin:
+            await event.chat.restrict(
+                user_id=event.from_user.id,
+                until_date=0,
+                permissions=ChatPermissions(can_send_messages=False)
+            )
         welcome_message_text = (
             chat_info.welcome_message_text
             .replace("{user}", name.get())
-            .replace("{user_nolink}", name.get(False))
+            .replace("{user_name}", html_decoration.quote(event.new_chat_member.user.full_name))
             .replace("{user_id}", str(event.from_user.id))
-            .replace("{chat_name}", event.chat.title or str(event.chat.id))
+            .replace("{chat_title}", event.chat.title or str(event.chat.id))
+            .replace("{timestamp}", str(int(time())))
         )
         msg = await event.bot.send_message(
             chat_id=event.chat.id,
             text=welcome_message_text,
-            reply_markup=keyboards.captcha_keyboard(
+            reply_markup=None if invited_by_admin else keyboards.captcha_keyboard(
                 i18n,
                 int(time()) + chat_info.welcome_message_timeout,
                 event.from_user.id,

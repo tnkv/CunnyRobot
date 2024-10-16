@@ -73,7 +73,13 @@ command-configuration-welcome =
 command-configuration-welcome-setwelcome =
     To set up a new greeting, write it in the following message.
 
-    To mention the user, add <code>{"{user}"}</code> in the text.
+    Following parameters can be used in the text for substitution:
+    • <code>{"{user}"}</code> — for user mention
+    • <code>{"{user_name}"}</code> — for user name
+    • <code>{"{user_id}"}</code> — for user ID.
+    • <code>{"{chat_title}"}</code> — for chat title
+    • <code>{"{timestamp}"}</code> — UNIX Timestamp.
+
     For text formatting, use the options in the client.
 
     The next message you enter will become a greeting in this chat, to exit the edit mode run the command /cancel
