@@ -3,24 +3,32 @@ import logging
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
+from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram_i18n import I18nMiddleware
 from aiogram_i18n.cores import FluentRuntimeCore
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 import config
 from src.commands import router
-from src.utils import db, middlewares, enums
+from src.utils import db, middlewares, enums, mjson
+from src.utils.middlewares.retry import RetryRequestMiddleware
 
 dp = Dispatcher()
-bot = Bot(
-    token=config.BOT_TOKEN,
-    default=DefaultBotProperties(
-        parse_mode="HTML"
-    )
-)
+
 
 
 async def main() -> None:
+    session: AiohttpSession = AiohttpSession(json_loads=mjson.decode, json_dumps=mjson.encode)
+    session.middleware(RetryRequestMiddleware())
+
+    bot = Bot(
+        token=config.BOT_TOKEN,
+        session=session,
+        default=DefaultBotProperties(
+            parse_mode="HTML"
+        )
+    )
+
     engine = create_async_engine(url=config.DB_URL)
     sessionmaker = async_sessionmaker(engine, expire_on_commit=False)
     async with engine.begin() as conn:
