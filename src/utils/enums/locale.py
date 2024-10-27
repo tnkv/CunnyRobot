@@ -8,7 +8,7 @@ class Locale(StrEnum):
     EN = auto()
     RU = auto()
 
-    DEFAULT = EN
+    DEFAULT = RU
 
     @classmethod
     def resolve(cls, locale: Optional[str] = None) -> Locale:

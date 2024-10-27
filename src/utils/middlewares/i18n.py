@@ -40,7 +40,7 @@ class LocaleManager(BaseManager, ABC):
 
             return cast(str, self.default_locale)
 
-        return chat_info.chat_language
+        return chat_info.chat_language or cast(str, self.default_locale)
 
     async def set_locale(self):
         pass

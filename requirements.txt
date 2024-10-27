@@ -6,5 +6,5 @@ SQLAlchemy~=2.0.27
 aiosqlite~=0.20.0
 psutil~=5.9.8
 GitPython~=3.1.42
-aiogram_i18n~=1.4.4
+aiogram_i18n~=1.4
 fluent.runtime~=0.4.0

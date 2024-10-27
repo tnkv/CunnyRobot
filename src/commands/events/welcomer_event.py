@@ -1,7 +1,9 @@
+import asyncio
 from time import time
 
 from aiogram import Router
 from aiogram.enums import ChatMemberStatus
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import ChatMemberUpdatedFilter, IS_NOT_MEMBER, ADMINISTRATOR, MEMBER, JOIN_TRANSITION
 from aiogram.types import ChatMemberUpdated, ChatPermissions, CallbackQuery
 from aiogram.utils.text_decorations import html_decoration
@@ -111,6 +113,27 @@ async def event_new_member(event: ChatMemberUpdated, chat_info: ChatInfo, i18n: 
             text=i18n.cas.autoban()
         )
 
+        # Удаляю сообщение через 10 минут, что бы не было спама в чат от меня же
+        await asyncio.sleep(10 * 60)
+        try:
+            await msg.delete()
+        except Exception:
+            pass
+        return
+
+    # Повторная проверка CAS
+    await asyncio.sleep(30 * 60)
+
+    if await utils.is_cas_ban(event.from_user.id):
+        try:
+            await event.chat.ban(user_id=event.from_user.id)
+            await msg.edit_text(
+                text=i18n.cas.autoban()
+            )
+            await asyncio.sleep(5 * 60)
+            await msg.delete()
+        except Exception:
+            pass
 
 
 # Обработка кнопки в капче
@@ -128,8 +151,8 @@ async def callback_captcha(callback: CallbackQuery, callback_data: CaptchaCallba
         await callback.answer(
             text=i18n.callback.button_become_active_in(
                 seconds=i18n.common.format.seconds.wait(
-                    form=utils.inflect_with_num(date-date_now),
-                    count=date-date_now
+                    form=utils.inflect_with_num(date - date_now),
+                    count=date - date_now
                 )
             ),
             show_alert=True
@@ -159,6 +182,8 @@ async def callback_captcha(callback: CallbackQuery, callback_data: CaptchaCallba
             )
         )
         await callback.message.edit_reply_markup()
+    except TelegramBadRequest:
+        return
     except Exception as e:
         await callback.bot.send_message(
             chat_id=callback.message.chat.id,
