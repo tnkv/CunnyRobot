@@ -36,3 +36,6 @@ command-tribunal-insufficient_yesvotes =
     Voting for mute { $name } ended with { $mute_votes_percent }% in favor, but at least 66% is required for mute, the user will not be muted.
 command-tribunal-another_restriction = Voting ended, but the user received a different punishment while waiting.
 command-tribunal-finish = Voting for mute { $name } ended with { $mute_votes_percent }% in favor, user is sent to mute for { $mute_period } minutes.
+
+keyboards-tribunal-confirm_yes = Confirm
+keyboards-tribunal-confirm_no = Return

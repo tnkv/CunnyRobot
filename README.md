@@ -58,7 +58,7 @@
     TOKEN="123:ABCabc"
     ADMIN_ID=123456,654321
     ```
-- Запустите бота `python3 main.py`
+- Запустите бота `python3 main.py` или через `docker compose up -d` дял docker контейнера
 
 ### Разработка
 

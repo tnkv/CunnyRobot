@@ -5,7 +5,7 @@ from aiogram import Router, F
 from aiogram.enums import ChatMemberStatus
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
-from aiogram.types import Message, ChatPermissions, CallbackQuery
+from aiogram.types import Message, ChatPermissions, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram_i18n import I18nContext
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -88,7 +88,9 @@ async def command_tribunal(
             if (await database.get_chat_info(temp_session, message.chat.id)).LastTribunalEnd < time():
                 return  # Проверка что трибунал не был отменён администратором
         try:
-            await msg.edit_reply_markup(reply_markup=keyboards.cancel_tribunal_keyboard(i18n, end_time - int(time())))
+            new_markup = keyboards.cancel_tribunal_keyboard(i18n, end_time - int(time()))
+            if msg.reply_markup != new_markup:
+                await msg.edit_reply_markup(reply_markup=new_markup)
         except TelegramBadRequest:
             continue
 
@@ -143,14 +145,23 @@ async def command_tribunal(
     except Exception as e:
         await message.answer(i18n.get('common-errors-cant_mute', exception=str(e)))
 
-
-# Обработка отмены трибунала
 @router.callback_query(F.data == 'cancel_tribunal', filters.CallbackAdminFilter(False))
-async def callback_cancel_tribunal(
-        callback: CallbackQuery,
-        session: AsyncSession,
-        chat_info: ChatInfo,
-        i18n: I18nContext) -> None:
+async def callback_confirm_cancel_tribunal(callback: CallbackQuery, chat_info: ChatInfo, i18n: I18nContext):
+    remaining = max(chat_info.last_tribunal_end - int(time()), 0)
+    if remaining <= 0:
+        return
+
+    markup = InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text=i18n.get('keyboards-tribunal-confirm_yes'), callback_data='confirm_cancel_tribunal'),
+            InlineKeyboardButton(text=i18n.get('keyboards-tribunal-confirm_no'), callback_data='deny_cancel_tribunal'),
+        ]
+    ])
+    await callback.message.edit_reply_markup(reply_markup=markup)
+    await callback.answer()
+
+@router.callback_query(F.data == 'confirm_cancel_tribunal', filters.CallbackAdminFilter(False))
+async def callback_do_cancel_tribunal(callback: CallbackQuery, session: AsyncSession, chat_info: ChatInfo, i18n: I18nContext):
     chat_info.set_tribunal_timeout(int(time()))
     await database.set_chat_info(session, chat_info.export())
     try:
@@ -162,3 +173,13 @@ async def callback_cancel_tribunal(
         )
     except Exception as e:
         await callback.answer(i18n.get('common-errors-global', exception=str(e)))
+
+@router.callback_query(F.data == 'deny_cancel_tribunal', filters.CallbackAdminFilter(False))
+async def callback_deny_cancel_tribunal(callback: CallbackQuery, chat_info: ChatInfo, i18n: I18nContext):
+    end_time = chat_info.last_tribunal_end - 90
+    remaining = max(end_time - int(time()), 0)
+
+    await callback.message.edit_reply_markup(
+        reply_markup=keyboards.cancel_tribunal_keyboard(i18n, remaining)
+    )
+    await callback.answer()

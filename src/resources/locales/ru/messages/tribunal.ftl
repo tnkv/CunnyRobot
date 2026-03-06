@@ -36,3 +36,6 @@ command-tribunal-insufficient_yesvotes =
     Голосование за мут { $name } закончилось с { $mute_votes_percent }% голосов за, но для мута требуется хотя бы 66%, пользователь не будет замьючен.
 command-tribunal-another_restriction = Трибунал завершён, но во время ожидания пользователь получил другое наказание.
 command-tribunal-finish = Голосование за мут { $name } закончилось с { $mute_votes_percent }% голосов за, пользователь отправляется в мут на { $mute_period } минут.
+
+keyboards-tribunal-confirm_yes = Подтвердить
+keyboards-tribunal-confirm_no = Вернуться
