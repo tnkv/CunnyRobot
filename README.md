@@ -46,13 +46,18 @@
   - Для Linux/macOS
     ```shell
     export TOKEN="123:ABCabc"
-    export ADMIN_ID=123456
+    export ADMIN_ID=123456,654321
     ```
   - Для Windows
     ```shell
     set TOKEN="123:ABCabc"
-    set ADMIN_ID=123456
+    set ADMIN_ID=123456,654321
     ``` 
+- Или запишите в .env файл если запускается контейнер
+    ```env
+    TOKEN="123:ABCabc"
+    ADMIN_ID=123456,654321
+    ```
 - Запустите бота `python3 main.py`
 
 ### Разработка

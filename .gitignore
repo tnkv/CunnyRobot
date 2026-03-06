@@ -4,3 +4,4 @@ CunnyRobot/
 TribunalBot/
 .idea/
 venv
+.env

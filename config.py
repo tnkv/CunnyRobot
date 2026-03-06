@@ -1,7 +1,7 @@
 from os import getenv
 
 BOT_TOKEN = getenv('TOKEN')
-ADMIN_ID = int(getenv('ADMIN_ID', 0))
+ADMIN_ID = [int(x.strip()) for x in getenv('ADMIN_ID', '').split(',') if x.strip()]
 
 LOCALES = ('ru', 'en')
 

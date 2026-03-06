@@ -32,11 +32,11 @@ class CallbackAdminFilter(BaseFilter):
 
 class SuperUserFilter(BaseFilter):
     async def __call__(self, message: Message, i18n: I18nContext) -> bool:
-        if config.ADMIN_ID == 0:
+        if not config.ADMIN_ID:
             await message.answer(i18n.get('common-super_admin_not_set'))
             return False
 
-        if message.from_user.id == config.ADMIN_ID:
+        if message.from_user.id in config.ADMIN_ID:
             return True
 
         return False
