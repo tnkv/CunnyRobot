@@ -36,7 +36,7 @@ ADMIN_GROUP_COMMANDS = {
     "warn": "botinfo-admcmd-warn",
     "unwarn": "botinfo-admcmd-unwarn",
     "give_immunity": "botinfo-admcmd-giveimmunity",
-    "revoke_immunity": "botinfo-admcmd-revokeimminity",
+    "revoke_immunity": "botinfo-admcmd-revokeimmunity",
     "configure": "botinfo-admcmd-configure"
 }
 

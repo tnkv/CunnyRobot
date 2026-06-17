@@ -12,7 +12,7 @@ botinfo-admcmd-mute = Mute user
 botinfo-admcmd-ban = Ban user
 botinfo-admcmd-warn = Warn user
 botinfo-admcmd-unwarn = Unwarn user
-botinfo-admcmd-giveimmunity = Give votemute imminity
-botinfo-admcmd-revokeimmunity = Revoke votemute imminity
+botinfo-admcmd-giveimmunity = Give votemute immunity
+botinfo-admcmd-revokeimmunity = Revoke votemute immunity
 botinfo-admcmd-configure = Configure chat
 
