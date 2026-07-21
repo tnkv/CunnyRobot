@@ -36,13 +36,13 @@ async def event_new_chat(event: ChatMemberUpdated, session: AsyncSession, i18n: 
 @router.chat_member(ChatMemberUpdatedFilter(member_status_changed=JOIN_TRANSITION))
 async def event_new_member(event: ChatMemberUpdated, chat_info: ChatInfo, i18n: I18nContext) -> None:
     invited_by_admin = await utils.is_admin(event.from_user.id, event.chat)
+    joined_user_id = event.new_chat_member.user.id
     if chat_info.is_comments:
         if invited_by_admin:
             return
 
-        await event.chat.ban(user_id=event.from_user.id)
         await event.chat.restrict(
-            user_id=event.from_user.id,
+            user_id=joined_user_id,
             until_date=0,
             permissions=ChatPermissions(
                 can_send_messages=True,
@@ -65,7 +65,7 @@ async def event_new_member(event: ChatMemberUpdated, chat_info: ChatInfo, i18n: 
     if not chat_info.welcome_message:
         return
 
-    member = await event.chat.get_member(user_id=event.new_chat_member.user.id)
+    member = await event.chat.get_member(user_id=joined_user_id)
 
     name = utils.NameFormat(event.new_chat_member.user)
 
@@ -79,7 +79,7 @@ async def event_new_member(event: ChatMemberUpdated, chat_info: ChatInfo, i18n: 
     try:
         if not invited_by_admin:
             await event.chat.restrict(
-                user_id=event.from_user.id,
+                user_id=joined_user_id,
                 until_date=0,
                 permissions=ChatPermissions(can_send_messages=False)
             )
@@ -87,7 +87,7 @@ async def event_new_member(event: ChatMemberUpdated, chat_info: ChatInfo, i18n: 
             chat_info.welcome_message_text
             .replace("{user}", name.get())
             .replace("{user_name}", html_decoration.quote(event.new_chat_member.user.full_name))
-            .replace("{user_id}", str(event.from_user.id))
+            .replace("{user_id}", str(joined_user_id))
             .replace("{chat_title}", event.chat.title or str(event.chat.id))
             .replace("{timestamp}", str(int(time())))
         )
@@ -97,8 +97,9 @@ async def event_new_member(event: ChatMemberUpdated, chat_info: ChatInfo, i18n: 
             reply_markup=None if invited_by_admin else keyboards.captcha_keyboard(
                 i18n,
                 int(time()) + chat_info.welcome_message_timeout,
-                event.from_user.id,
-                event.chat.id),
+                joined_user_id,
+                event.chat.id
+            ),
             disable_web_page_preview=True
         )
     except Exception as e:
@@ -107,8 +108,8 @@ async def event_new_member(event: ChatMemberUpdated, chat_info: ChatInfo, i18n: 
             text=i18n.get('common-errors-cant_mute', exception=str(e))
         )
 
-    if await utils.is_cas_ban(event.from_user.id):
-        await event.chat.ban(user_id=event.from_user.id)
+    if await utils.is_cas_ban(joined_user_id):
+        await event.chat.ban(user_id=joined_user_id)
         await msg.edit_text(
             text=i18n.cas.autoban()
         )
@@ -124,9 +125,9 @@ async def event_new_member(event: ChatMemberUpdated, chat_info: ChatInfo, i18n: 
     # Повторная проверка CAS
     await asyncio.sleep(30 * 60)
 
-    if await utils.is_cas_ban(event.from_user.id):
+    if await utils.is_cas_ban(joined_user_id):
         try:
-            await event.chat.ban(user_id=event.from_user.id)
+            await event.chat.ban(user_id=joined_user_id)
             await msg.edit_text(
                 text=i18n.cas.autoban()
             )
