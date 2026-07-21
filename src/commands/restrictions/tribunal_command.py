@@ -85,7 +85,7 @@ async def command_tribunal(
         timer += 5
         await asyncio.sleep(min(timer - time(), end_time - time()))
         async with session_pool() as temp_session:
-            if (await database.get_chat_info(temp_session, message.chat.id)).LastTribunalEnd < time():
+            if (await database.get_chat_info(temp_session, message.chat)).LastTribunalEnd < time():
                 return  # Проверка что трибунал не был отменён администратором
         try:
             await msg.edit_reply_markup(reply_markup=keyboards.cancel_tribunal_keyboard(i18n, end_time - int(time())))

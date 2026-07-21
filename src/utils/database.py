@@ -1,25 +1,36 @@
+from aiogram.types import Chat, User
 from sqlalchemy import select, Result, func, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.utils.db import TribunalBot, Warns
 
 
-async def add_chat(session: AsyncSession, telegram_chat_id: int) -> TribunalBot:
-    request = select(TribunalBot).filter_by(TelegramChatID=telegram_chat_id)
+async def add_chat(session: AsyncSession, chat: Chat) -> TribunalBot:
+    request = select(TribunalBot).filter_by(TelegramChatID=chat.id)
     result: Result = await session.execute(request)
     res: TribunalBot = result.scalar_one_or_none()
 
     if res is not None:
+        res.ChatType = chat.type
+        res.Title = chat.title
+        res.UserName = chat.username
+        await session.commit()
         return res
 
-    telegram_chat = TribunalBot(TelegramChatID=telegram_chat_id)
+    telegram_chat = TribunalBot(
+        TelegramChatID=chat.id,
+        ChatType=chat.type,
+        Title=chat.title,
+        Username=chat.username
+    )
+
     session.add(telegram_chat)
     await session.commit()
     return telegram_chat
 
 
-async def get_chat_info(session: AsyncSession, telegram_chat_id: int) -> TribunalBot | None:
-    request = select(TribunalBot).filter_by(TelegramChatID=telegram_chat_id)
+async def get_chat_info(session: AsyncSession, chat: Chat) -> TribunalBot | None:
+    request = select(TribunalBot).filter_by(TelegramChatID=chat.id)
     result: Result = await session.execute(request)
     return result.scalar_one_or_none()
 
@@ -60,10 +71,12 @@ async def deactivate_warns(session: AsyncSession, warn: Warns) -> None:
     await session.commit()
 
 
-async def get_warns(session: AsyncSession, telegram_chat_id, telegram_user_id: int):
+async def get_warns(session: AsyncSession, chat: Chat, user: User):
     request = select(Warns).filter_by(
-        TelegramChatID=telegram_chat_id,
-        TelegramUserID=telegram_user_id,
-        IsActive=True)
+        TelegramChatID=chat.id,
+        TelegramUserID=user.id,
+        IsActive=True
+    )
+
     result: Result = await session.execute(request)
     return result.scalars().all()

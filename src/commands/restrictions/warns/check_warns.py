@@ -14,8 +14,8 @@ async def command_checkwarns(message: Message, session: AsyncSession, i18n: I18n
     if not message.reply_to_message:
         warns = await database.get_warns(
             session,
-            message.chat.id,
-            message.from_user.id
+            message.chat,
+            message.from_user
         )
         name = utils.NameFormat(message.from_user)
 
@@ -31,8 +31,8 @@ async def command_checkwarns(message: Message, session: AsyncSession, i18n: I18n
     target_name = utils.NameFormat(message.reply_to_message.sender_chat or message.reply_to_message.from_user)
     warns = await database.get_warns(
         session,
-        message.chat.id,
-        message.reply_to_message.from_user.id
+        message.chat,
+        message.reply_to_message.from_user
     )
     if len(warns) == 0:
         return await message.reply(text=i18n.get('command-warn-check-nowarns', name=target_name.get()))

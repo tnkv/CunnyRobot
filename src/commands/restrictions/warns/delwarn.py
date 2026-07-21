@@ -33,8 +33,8 @@ async def callback_delwarn(
 async def command_delwarn(message: Message, session: AsyncSession, i18n: I18nContext):
     warns = await database.get_warns(
         session,
-        message.chat.id,
-        message.reply_to_message.from_user.id
+        message.chat,
+        message.reply_to_message.from_user
     )
     target_name = utils.NameFormat(message.reply_to_message.from_user)
 

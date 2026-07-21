@@ -1,6 +1,6 @@
 from typing import Callable, Awaitable, Dict, Any
 
-from aiogram import BaseMiddleware
+from aiogram import BaseMiddleware, Bot
 from aiogram.enums import ChatType
 from aiogram.types import TelegramObject, Chat
 from sqlalchemy.ext.asyncio import async_sessionmaker
@@ -23,25 +23,27 @@ class DbSessionMiddleware(BaseMiddleware):
         async with self.session_pool() as session:
             data["session"] = session
             data["session_pool"] = self.session_pool
-            if not (event.message or event.callback_query or event.chat_member or event.my_chat_member):
-                return await handler(event, data)
             data["chat_info"] = None
 
-            if event.message:
-                chat_obj: Chat = event.message.chat
-            elif event.callback_query:
-                chat_obj: Chat = event.callback_query.message.chat
-            elif event.chat_member:
-                chat_obj: Chat = event.chat_member.chat
-            else:
-                chat_obj: Chat = event.my_chat_member.chat
+            chat_obj: Chat | None = data.get("event_chat")
 
-            if chat_obj.type != ChatType.PRIVATE:
-                chat_in_db = await database.get_chat_info(session, chat_obj.id)
+            if not chat_obj:
+                return await handler(event, data)
 
-                if chat_in_db is None:
-                    chat_in_db = await database.add_chat(session, chat_obj.id)
+            if chat_obj.type == ChatType.CHANNEL:
+                bot: Bot = data.get("bot")
+                if bot:
+                    try:
+                        await bot.leave_chat(chat_obj.id)
+                        print(f"Unsubscribe from channel ID: {chat_obj.id}.")
+                    except Exception:
+                        pass
 
-                data["chat_info"] = ChatInfo(chat_in_db)
+            if chat_obj.type == ChatType.PRIVATE:
+                return await handler(event, data)
+
+            chat_in_db = await database.add_chat(session, chat_obj)
+
+            data["chat_info"] = ChatInfo(chat_in_db)
 
             return await handler(event, data)
